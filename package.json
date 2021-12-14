@@ -9,9 +9,11 @@
   "private": true,
   "devDependencies": {
     "@types/node": "^16.11.12",
+    "arg": "^5.0.1",
     "typescript": "^4.5.3"
   },
   "dependencies": {
+    "@discordjs/builders": "^0.9.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "discord-api-types": "^0.25.2",
     "discord.js": "^13.3.1",

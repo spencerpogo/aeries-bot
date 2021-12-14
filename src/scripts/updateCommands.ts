@@ -1,15 +1,26 @@
 import { REST } from "@discordjs/rest";
+import arg from "arg";
 import { Routes } from "discord-api-types/v9";
+import { COMMANDS } from "../allCommands";
 import { CONFIG } from "../config";
 
-function main() {
+const commandData = COMMANDS.map((c) => c.meta.toJSON());
+
+async function main() {
+  const args = arg({
+    "--client-id": String,
+    "--guild-id": String,
+  });
+  if (!args["--client-id"]) throw new Error("Client ID is required");
+  const clientId: string = args["--client-id"];
   const rest = new REST({ version: "9" }).setToken(CONFIG.TOKEN);
 
-  const args = process.argv.slice(2);
-  const cmd = args[0];
-  if (cmd == "global") {
-    await rest.put(Routes.applicationCommands(clientId), { body: commands });
-  }
+  const [name, route] = args["--guild-id"]
+    ? ["guild", Routes.applicationGuildCommands(clientId, args["--guild-id"])]
+    : ["global", Routes.applicationCommands(clientId)];
+
+  console.log(`Updating ${name} slash commands...`);
+  await rest.put(route, { body: commandData });
 }
 
 main();

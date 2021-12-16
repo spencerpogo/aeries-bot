@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import { CommandType } from "./types";
+import { CommandType } from "../types";
 
 async function handler(interaction: CommandInteraction) {
   await interaction.reply("Hello, world!");

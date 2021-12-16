@@ -1,10 +1,6 @@
-import envSchema from "env-schema";
-import S from "fluent-json-schema";
+import { z } from "zod";
 
-type ConfigData = {
-  TOKEN: string;
-};
-
-const schema = S.object().prop("TOKEN", S.string().required());
-
-export const CONFIG = envSchema<ConfigData>({ schema });
+const schema = z.object({
+  TOKEN: z.string(),
+});
+export const CONFIG = schema.parse(process.env);

@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
 import { COMMANDS } from "../allCommands";
-import { CommandType } from "../commands/types";
 import { CONFIG } from "../config";
+import { CommandType } from "../types";
 
 const client = new Client({ intents: [] });
 

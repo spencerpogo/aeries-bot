@@ -20,6 +20,8 @@ function validateUrl(urlString: string | null): boolean {
   return url.protocol === "http:" || url.protocol === "https:";
 }
 
+export class LoginError extends Error {}
+
 export class AeriesClient {
   readonly baseURL;
   readonly portalName;
@@ -72,7 +74,7 @@ export class AeriesClient {
       resp.status != 302 ||
       resp.headers.get("location") != this.baseURL + "/Default.aspx"
     ) {
-      throw new Error("Aeries login failed. Check your credentials.");
+      throw new LoginError("Aeries login failed. Check your credentials.");
     }
   }
 

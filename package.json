@@ -1,6 +1,7 @@
 {
   "name": "aeries-discord-bot",
   "version": "1.0.0",
+  "type": "module",
   "description": "Discord bot to alert about aeries grade changes ",
   "main": "src/index.ts",
   "repository": "https://github.com/Scoder12/aeries-discord-bot",

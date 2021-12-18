@@ -5,6 +5,7 @@ import { RESTPostAPIApplicationCommandsJSONBody } from "discord.js/node_modules/
 import { COMMANDS } from "../allCommands";
 import { CONFIG } from "../config";
 
+const commandNames: string[] = COMMANDS.map((c) => c.meta.name);
 const commandData: RESTPostAPIApplicationCommandsJSONBody[] = COMMANDS.map(
   (c) => c.meta.toJSON()
 );
@@ -23,6 +24,7 @@ async function main() {
     : ["global", Routes.applicationCommands(clientId)];
 
   console.log(`Updating ${name} slash commands...`);
+  console.log(`${commandNames.length} commands:\n${commandNames.join("\n")}`);
   await rest.put(route, { body: commandData });
 }
 

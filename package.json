@@ -7,6 +7,10 @@
   "author": "Scoder12 <34356756+Scoder12@users.noreply.github.com>",
   "license": "AGPL-3.0-only",
   "private": true,
+  "scripts": {
+    "watch": "tsc -w",
+    "start": "node ./dist/scripts/main.js"
+  },
   "devDependencies": {
     "@types/node": "^16.11.12",
     "arg": "^5.0.1",

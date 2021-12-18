@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.12",
+    "@types/qs": "^6.9.7",
     "arg": "^5.0.1",
     "prisma": "3.5.0",
     "typescript": "^4.5.3"
@@ -21,9 +22,12 @@
     "@discordjs/builders": "^0.9.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "@prisma/client": "3.5.0",
+    "cheerio": "^1.0.0-rc.10",
     "discord-api-types": "^0.25.2",
     "discord.js": "^13.3.1",
+    "fetch-cookie": "^1.0.0",
     "node-fetch": "^3.1.0",
+    "qs": "^6.10.2",
     "zod": "^3.11.6"
   }
 }

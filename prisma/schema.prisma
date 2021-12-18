@@ -12,6 +12,7 @@ datasource db {
 
 model User {
   id             Int    @id @default(autoincrement())
+  discordId      String @unique
   portalUsername String
   portalPassword String
 }

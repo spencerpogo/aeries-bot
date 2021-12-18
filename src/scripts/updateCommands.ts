@@ -1,10 +1,13 @@
 import { REST } from "@discordjs/rest";
 import arg from "arg";
 import { Routes } from "discord-api-types/v9";
+import { RESTPostAPIApplicationCommandsJSONBody } from "discord.js/node_modules/discord-api-types";
 import { COMMANDS } from "../allCommands";
 import { CONFIG } from "../config";
 
-const commandData = COMMANDS.map((c) => c.meta.toJSON());
+const commandData: RESTPostAPIApplicationCommandsJSONBody[] = COMMANDS.map(
+  (c) => c.meta.toJSON()
+);
 
 async function main() {
   const args = arg({

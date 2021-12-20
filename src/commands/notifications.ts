@@ -26,7 +26,7 @@ async function handler(interaction: CommandInteraction) {
       data: { notificationsEnabled },
     });
   } catch (e) {
-    if (e.code == "P2025") {
+    if (e instanceof PrismaClientKnownRequestError && e.code == "P2025") {
       await interaction.editReply("You must login before using this command");
       return;
     }

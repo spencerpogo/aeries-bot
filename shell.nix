@@ -1,8 +1,11 @@
 { pkgs ? import <nixpkgs> { } }:
-pkgs.mkShell {
-  # nativeBuildInputs is usually what you want -- tools you need to run
-  nativeBuildInputs =
-    [ pkgs.nodejs-17_x pkgs.nodePackages.yarn pkgs.nodePackages.prisma ];
+let nodeVersion = pkgs.nodejs-17_x;
+in pkgs.mkShell {
+  nativeBuildInputs = [
+    nodeVersion
+    (pkgs.yarn.override { nodejs = nodeVersion; })
+    pkgs.nodePackages.prisma
+  ];
   shellHook = with pkgs; ''
     export PRISMA_MIGRATION_ENGINE_BINARY="${prisma-engines}/bin/migration-engine"
     export PRISMA_QUERY_ENGINE_BINARY="${prisma-engines}/bin/query-engine"

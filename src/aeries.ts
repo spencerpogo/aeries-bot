@@ -35,7 +35,7 @@ export class AeriesClient {
 
   static create(domain: string, portalName: string) {
     return new AeriesClient(
-      `https://${domain}/${portalName}`,
+      domain + "/" + portalName,
       portalName,
       fetchCookieWrapper(nodeFetch)
     );

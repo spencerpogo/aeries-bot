@@ -38,6 +38,7 @@ async function handler(interaction: CommandInteraction) {
     create: {
       ...data,
       discordId,
+      notificationsEnabled: false,
     },
   });
   // TODO: Prompt to enable notifications

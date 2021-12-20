@@ -11,19 +11,9 @@ datasource db {
 }
 
 model User {
-  id             Int    @id @default(autoincrement())
-  discordId      String @unique
-  portalUsername String
-  portalPassword String
-}
-
-model Class {
-  id           Int    @id @default(autoincrement())
-  gradebookUrl String
-  name         String
-  teacher      String
-  period       String
-  gradeSummary String
-  missing      String
-  // todo add assignments
+  id                   Int     @id @default(autoincrement())
+  discordId            String  @unique
+  portalUsername       String
+  portalPassword       String
+  notificationsEnabled Boolean
 }

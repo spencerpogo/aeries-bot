@@ -33,7 +33,8 @@ async function handler(interaction: CommandInteraction) {
     throw e;
   }
   await interaction.editReply(
-    "Notifications sucessfully " + notificationsEnabled ? "enabled" : "disabled"
+    "Notifications sucessfully " +
+      (notificationsEnabled ? "enabled" : "disabled")
   );
 }
 

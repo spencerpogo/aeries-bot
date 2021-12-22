@@ -34,7 +34,7 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("ready", async () => {
   console.log(`Sucessfully logged in as ${client.user?.tag ?? "??"}`);
-  await sendNotifications();
+  sendNotifications();
 });
 
 async function main() {

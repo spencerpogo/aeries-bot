@@ -46,12 +46,12 @@ function makeFakeClass(n: string | number): ClassData {
 }
 
 const classes = [...Array(2).keys()].map(makeFakeClass);
-let i = 0;
 
 function getClassData(): ClassData[] {
-  const c = classes[i];
-  i = (i + 1) % classes.length;
-  return [c];
+  return classes.map((c) => ({
+    ...c,
+    CurrentMarkAndScore: `F (${(Math.random() * 100).toFixed(2)}%)`,
+  }));
 }
 
 app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {

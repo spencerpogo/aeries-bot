@@ -116,7 +116,7 @@ export async function sendNotifications() {
     try {
       const embeds = await processUser(user);
       // send the embeds, 10 at a time
-      const MAX_EMBEDS = 1;
+      const MAX_EMBEDS = 10;
       for (let i = 0; i < embeds.length; i += MAX_EMBEDS) {
         const chunk = embeds.slice(i, i + MAX_EMBEDS);
         await sendAlert(user.discordId, chunk);

@@ -3,7 +3,7 @@ import fetchCookieWrapper from "fetch-cookie";
 import nodeFetch, { Response } from "node-fetch";
 import { stringify as queryStringify } from "qs";
 import { CONFIG } from "./config.js";
-import { ClassSummary } from "./types";
+import { Assignment, ClassSummary } from "./types";
 
 type FetchFunction = typeof nodeFetch;
 
@@ -130,6 +130,65 @@ export class AeriesClient {
             : undefined,
       };
     });
+  }
+
+  async getAssignments(gradebookUrl: string): Promise<Assignment[]> {
+    // Aeries is very weird and will throw an error if SC is not set, yet they don't
+    //  include it in the URLs returned by the ClassSummary widget.
+    const url = new URL(this.baseURL + "/" + gradebookUrl);
+    url.searchParams.set("SC", "42");
+
+    const res = await this.fetch(url.toString(), {
+      headers: { "user-agent": userAgent },
+    });
+    this._checkResponse(res);
+    const html = await res.text();
+    const $ = cheerioLoad(html);
+    const assignmentRows = $(
+      "#ctl00_MainContent_subGBS_tblEverything table.GradebookDetailsTable tr.assignment-info"
+    );
+    return assignmentRows
+      .get()
+      .map((row): Assignment | null => {
+        const cells = $(row).children("td");
+        if (cells.length != 11) return null;
+        // prettier-ignore
+        const [
+          , // id
+          name,
+          category,
+          score, 
+          // this is the "raw" score before it is compressed to fit into the amount of
+          //  points the assignment is worth.most of the time it is the same as score.
+          , 
+          percent, // percentage
+          , // comment
+          , // date completed
+          , // due date
+          gcElem,
+          , // documents
+        ] = cells;
+        // score is a table with a single row and 3 columns
+        const scoreItems = $(score).find("td");
+        let points = null;
+        let maxPoints = null;
+        if (scoreItems.length == 3) {
+          points = Number(trim($(scoreItems[0])));
+          // scoreItems[1].innerText == ' / '
+          maxPoints = Number(trim($(scoreItems[2])));
+        }
+        // we default to yes when unsure
+        const gradingComplete = trim($(gcElem)).toLowerCase() !== "no";
+        return {
+          name: trim($(name)),
+          category: trim($(category)),
+          points,
+          maxPoints,
+          percent: trim($(percent)),
+          gradingComplete,
+        };
+      })
+      .filter((i): i is Assignment => i !== null);
   }
 }
 

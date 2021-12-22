@@ -126,5 +126,5 @@ export async function sendNotifications() {
       continue;
     }
   }
-  setTimeout(sendNotifications, 10 * 1000);
+  setTimeout(sendNotifications, 5 * 1000);
 }

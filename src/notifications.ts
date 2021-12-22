@@ -67,9 +67,10 @@ function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
   return [
     {
       name: `${prefix} in ${formatClass(c)}`,
-      value: `${Util.escapeMarkdown(old.gradeSummary)} :arrow_right: ${
-        c.gradeSummary
-      }`,
+      value:
+        Util.escapeMarkdown(old.gradeSummary) +
+        " :arrow_right: " +
+        `**${Util.escapeMarkdown(c.gradeSummary)}**`,
     },
   ];
 }

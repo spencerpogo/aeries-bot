@@ -108,6 +108,7 @@ async function sendAlert(discordId: string, embeds: EmbedFieldData[]) {
 }
 
 export async function sendNotifications() {
+  console.log("Processing notifications...");
   const toProcess = await prisma.user.findMany({
     where: { notificationsEnabled: true },
   });

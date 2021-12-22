@@ -1,7 +1,8 @@
-import { Client, CommandInteraction } from "discord.js";
+import { CommandInteraction } from "discord.js";
 import { COMMANDS } from "../allCommands.js";
 import { client } from "../client.js";
 import { CONFIG } from "../config.js";
+import { sendNotifications } from "../notifications.js";
 import { CommandType } from "../types";
 
 const commandsMap: Map<string, CommandType> = new Map();
@@ -31,8 +32,9 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-client.on("ready", () => {
+client.on("ready", async () => {
   console.log(`Sucessfully logged in as ${client.user?.tag ?? "??"}`);
+  await sendNotifications();
 });
 
 async function main() {

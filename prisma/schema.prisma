@@ -16,4 +16,6 @@ model User {
   portalUsername       String
   portalPassword       String
   notificationsEnabled Boolean
+  // yeah I know, I know, but this always changes all at once
+  notificationsCache   String?
 }

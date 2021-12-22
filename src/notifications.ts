@@ -78,17 +78,14 @@ async function processUser(user: User): Promise<EmbedFieldData[]> {
   const client = getClient();
   await client.login(user.portalUsername, user.portalPassword);
   const classes = await client.getClasses();
-
-  if (!user.notificationsCache) {
-    const newData: GradesData = { classes };
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        notificationsCache: JSON.stringify(newData),
-      },
-    });
-    return [];
-  }
+  const newData: GradesData = { classes };
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      notificationsCache: JSON.stringify(newData),
+    },
+  });
+  if (!user.notificationsCache) return [];
   const oldData: GradesData = JSON.parse(user.notificationsCache);
   const { removed, added, changed } = compareData(oldData, classes);
   const embeds = removed

@@ -13,8 +13,12 @@ export type CommandType = {
 
 export interface Assignment {
   name: string;
-  grade: string;
-  description: string;
+  category: string;
+  points: number | null;
+  maxPoints: number | null;
+  percent: string;
+  gradingComplete: boolean;
+  // there are more fields possible but we don't use them for now...
 }
 
 export interface ClassSummary {

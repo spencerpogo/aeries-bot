@@ -120,6 +120,7 @@ export async function sendNotifications() {
         await sendAlert(user.discordId, chunk);
       }
     } catch (e) {
+      // TODO: Handle login errors
       // Don't crash the entire process on error
       // TODO: log these with a webhook
       console.error(e);

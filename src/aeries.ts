@@ -96,10 +96,9 @@ export class AeriesClient {
   parseGradebook(linkHTML: string): string | null {
     const $ = cheerioLoad(linkHTML);
     const linkHref = $("a.GradebookLink").first().attr("href");
-    const linkURL =
-      typeof linkHref === "string" ? this.baseURL + linkHref : null;
-    if (!validateUrl(linkURL)) return null;
-    return linkURL;
+    if (!linkHref) return null;
+    if (!validateUrl(this.baseURL + linkHref)) return null;
+    return linkHref;
   }
 
   async getClasses() {

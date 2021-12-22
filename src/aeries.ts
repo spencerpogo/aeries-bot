@@ -1,4 +1,4 @@
-import { load as cheerioLoad } from "cheerio";
+import { Cheerio, load as cheerioLoad } from "cheerio";
 import fetchCookieWrapper from "fetch-cookie";
 import nodeFetch, { Response } from "node-fetch";
 import { stringify as queryStringify } from "qs";
@@ -19,6 +19,12 @@ function validateUrl(urlString: string | null): boolean {
   }
   return url.protocol === "http:" || url.protocol === "https:";
 }
+
+const trim = (ele: Cheerio<any>) =>
+  ele
+    .text()
+    .replace(/[\n\r\t]/gm, "")
+    .trim();
 
 export class LoginError extends Error {}
 

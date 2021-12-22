@@ -33,20 +33,28 @@ type ClassData = {
   NumMissingAssignments: number;
 };
 
-function getClassData(): ClassData[] {
-  return [
-    {
-      Gradebook: '<a class="GradebookLink" href="/class1">',
-      CourseName: "class",
-      TeacherName: "teacher",
-      PeriodTitle: "1",
-      CurrentMarkAndScore: "F (69.42%)",
-      NumMissingAssignments: 42,
-    },
-  ];
+function makeFakeClass(n: string | number): ClassData {
+  return {
+    // TODO: Implement assignment checking
+    Gradebook: `<a class="GradebookLink" href="/class${n}">`,
+    CourseName: `class ${n}`,
+    TeacherName: `teacher ${n}`,
+    PeriodTitle: n.toString(),
+    CurrentMarkAndScore: "F (69.42%)",
+    NumMissingAssignments: 42,
+  };
 }
 
-app.get(`${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {
+const classes = [...Array(2).keys()].map(makeFakeClass);
+let i = 0;
+
+function getClassData(): ClassData[] {
+  const c = classes[i];
+  i = (i + 1) % classes.length;
+  return [c];
+}
+
+app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {
   if (!authed(req)) return res.status(401).end("auth pls");
   res.json(getClassData());
 });

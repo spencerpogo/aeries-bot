@@ -145,7 +145,9 @@ export class AeriesClient {
     const html = await res.text();
     const $ = cheerioLoad(html);
     const assignmentRows = $(
-      "#ctl00_MainContent_subGBS_tblEverything table.GradebookDetailsTable tr.assignment-info"
+      "#ctl00_MainContent_subGBS_tblEverything " +
+        "table.GradebookDetailsTable " +
+        "tr.assignment-info"
     );
     return assignmentRows
       .get()

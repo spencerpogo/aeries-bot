@@ -24,7 +24,7 @@ app.post(`/${portalName}/LoginParent.aspx`, (req, res) => {
   res.status(400).end("Bad credz");
 });
 
-type ClassData = {
+type SummaryData = {
   Gradebook: string;
   CourseName: string;
   TeacherName: string;
@@ -33,30 +33,36 @@ type ClassData = {
   NumMissingAssignments: number;
 };
 
-function makeFakeClass(n: string | number): ClassData {
+type ClassData = {
+  id: number;
+  data: SummaryData;
+};
+
+function makeFakeClass(n: number): ClassData {
   return {
-    // TODO: Implement assignment checking
-    Gradebook: `<a class="GradebookLink" href="/class${n}">`,
-    CourseName: `class ${n}`,
-    TeacherName: `teacher ${n}`,
-    PeriodTitle: n.toString(),
-    CurrentMarkAndScore: "F (69.42%)",
-    NumMissingAssignments: 42,
+    id: n,
+    data: {
+      // TODO: Implement assignment checking
+      Gradebook: `<a class="GradebookLink" href="/class/${n}">`,
+      CourseName: `class ${n}`,
+      TeacherName: `teacher ${n}`,
+      PeriodTitle: n.toString(),
+      CurrentMarkAndScore: "F (69.42%)",
+      NumMissingAssignments: 42,
+    },
   };
 }
 
 const classes = [...Array(2).keys()].map(makeFakeClass);
 
-function getClassData(): ClassData[] {
-  return classes.map((c) => ({
-    ...c,
-    CurrentMarkAndScore: `F (${(Math.random() * 100).toFixed(2)}%)`,
-  }));
+function getClassData(): SummaryData[] {
+  return classes.map((c) => c.data);
 }
 
 app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {
   if (!authed(req)) return res.status(401).end("auth pls");
-  res.json(getClassData());
+  const data: SummaryData[] = getClassData();
+  res.json(data);
 });
 
 app.listen(4337, () => console.log("http://127.0.0.1:4337/"));

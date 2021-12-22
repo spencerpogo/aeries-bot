@@ -1,9 +1,8 @@
 import { Client, CommandInteraction } from "discord.js";
 import { COMMANDS } from "../allCommands.js";
+import { client } from "../client.js";
 import { CONFIG } from "../config.js";
 import { CommandType } from "../types";
-
-const client = new Client({ intents: [] });
 
 const commandsMap: Map<string, CommandType> = new Map();
 for (const cmd of COMMANDS) {

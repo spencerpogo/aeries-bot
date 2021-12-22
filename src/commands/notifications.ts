@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/index.js";
 import { CommandInteraction } from "discord.js";
 import { prisma } from "../db.js";
 import { CommandType } from "../types";

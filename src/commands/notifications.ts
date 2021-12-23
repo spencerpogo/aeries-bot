@@ -20,6 +20,7 @@ async function handler(interaction: CommandInteraction) {
   }
 
   await interaction.deferReply({ ephemeral: true });
+  // TODO: Delete notificationsCache on notifications disable
 
   try {
     await prisma.user.update({

@@ -1,15 +1,16 @@
 import { Embed } from "@discordjs/builders";
 import { User } from "@prisma/client";
 import { EmbedFieldData, Util } from "discord.js";
-import { getClient } from "./aeries.js";
+import { AeriesClient, getClient } from "./aeries.js";
 import { client } from "./client.js";
-import { compareData } from "./compareData.js";
+import { compareAssignments, compareClasses } from "./compareData.js";
 import { prisma } from "./db.js";
-import { ClassSummary } from "./types.js";
+import { Assignment, ClassSummary } from "./types.js";
 
-// TODO: support assignments
+type ClassWithAssignments = ClassSummary & { assignments: Assignment[] };
+
 type GradesData = {
-  classes: ClassSummary[];
+  classes: ClassWithAssignments[];
 };
 
 function formatClass(c: ClassSummary): string {
@@ -75,22 +76,98 @@ function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
   ];
 }
 
-async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
-  const client = getClient();
-  await client.login(user.portalUsername, user.portalPassword);
-  const classes = await client.getClasses();
-  const newData: GradesData = { classes };
+function formatAddedAssignment(a: Assignment): EmbedFieldData {
+  return { name: "Assignment Graded" };
+}
+
+function getCachedData(user: User): GradesData | null {
+  if (!user.notificationsCache) return null;
+  try {
+    return JSON.parse(user.notificationsCache);
+  } catch (e) {
+    return null;
+  }
+}
+
+async function processNewUser(
+  user: User,
+  classes: ClassSummary[],
+  client: AeriesClient
+) {
+  // we already have the classes, so now fetch the assignments for each class.
+  const newClasses: ClassWithAssignments[] = [];
+  for (const c of classes) {
+    newClasses.push({
+      ...c,
+      assignments: c.gradebookUrl
+        ? await client.getAssignments(c.gradebookUrl)
+        : [],
+    });
+  }
+  const newData: GradesData = { classes: newClasses };
   await prisma.user.update({
     where: { id: user.id },
     data: {
       notificationsCache: JSON.stringify(newData),
     },
   });
-  if (!user.notificationsCache) return [];
-  const oldData: GradesData = JSON.parse(user.notificationsCache);
-  const { removed, added, changed } = compareData(oldData, classes);
-  const embeds = removed
-    .map(formatRemoved)
+}
+
+function getAssignmentsMap(
+  classes: ClassWithAssignments[]
+): Map<string, Assignment[]> {
+  const m = new Map<string, Assignment[]>();
+  for (const c of classes) {
+    m.set(c.name ?? "", c.assignments);
+  }
+  return m;
+}
+
+async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
+  const client = getClient();
+  await client.login(user.portalUsername, user.portalPassword);
+  // we will need the latest class data no matter what
+  const classes = await client.getClasses();
+
+  const oldData = getCachedData(user);
+  // has the user just now enabled notifications?
+  if (!oldData) {
+    await processNewUser(user, classes, client);
+    return [];
+  }
+
+  // this might have some weird edge cases lol
+  const { removed, added, changed } = compareClasses(oldData.classes, classes);
+  // merge the old assignments data and the new class data
+  const assignmentsMap = getAssignmentsMap(oldData.classes);
+  const classesMap = new Map<string, ClassWithAssignments>();
+  for (const c of classes) {
+    classesMap.set(c.name ?? "", {
+      ...c,
+      // in case the class is new the assignments will be added here
+      assignments:
+        assignmentsMap.get(c.name ?? "") ??
+        (c.gradebookUrl ? await client.getAssignments(c.gradebookUrl) : []),
+    });
+  }
+  let assignmentEmbeds: EmbedFieldData[] = [];
+  for (const [oldClass, newClass] of changed) {
+    if (!newClass.gradebookUrl) continue;
+    const oldAssignments = assignmentsMap.get(oldClass.name ?? "")!;
+    const newAssignments = await client.getAssignments(newClass.gradebookUrl);
+    classesMap.set(newClass.name ?? "", {
+      ...classesMap.get(newClass.name ?? "")!,
+      assignments: newAssignments,
+    });
+    const { added, removed, changed } = compareAssignments(
+      oldAssignments,
+      newAssignments
+    );
+    assignmentEmbeds = assignmentEmbeds.concat(added.map());
+  }
+
+  const embeds = assignmentEmbeds
+    .concat(removed.map(formatRemoved))
     .concat(added.map(formatAdded))
     .concat(changed.flatMap(([a, b]) => formatChanged(a, b)));
   return embeds;

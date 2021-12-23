@@ -75,7 +75,7 @@ function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
   ];
 }
 
-async function processUser(user: User): Promise<EmbedFieldData[]> {
+async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
   const client = getClient();
   await client.login(user.portalUsername, user.portalPassword);
   const classes = await client.getClasses();
@@ -105,6 +105,16 @@ async function sendAlert(discordId: string, embeds: EmbedFieldData[]) {
   });
 }
 
+async function processUser(user: User) {
+  const embeds = await getEmbedsForUser(user);
+  // send the embeds, 10 at a time
+  const MAX_EMBEDS = 10;
+  for (let i = 0; i < embeds.length; i += MAX_EMBEDS) {
+    const chunk = embeds.slice(i, i + MAX_EMBEDS);
+    await sendAlert(user.discordId, chunk);
+  }
+}
+
 export async function sendNotifications() {
   console.log("Processing notifications...");
   const toProcess = await prisma.user.findMany({
@@ -112,13 +122,7 @@ export async function sendNotifications() {
   });
   for (const user of toProcess) {
     try {
-      const embeds = await processUser(user);
-      // send the embeds, 10 at a time
-      const MAX_EMBEDS = 10;
-      for (let i = 0; i < embeds.length; i += MAX_EMBEDS) {
-        const chunk = embeds.slice(i, i + MAX_EMBEDS);
-        await sendAlert(user.discordId, chunk);
-      }
+      await processUser(user);
     } catch (e) {
       // TODO: Handle login errors
       // Don't crash the entire process on error

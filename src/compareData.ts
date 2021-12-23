@@ -1,43 +1,59 @@
-import { ClassSummary } from "./types.js";
+import { Assignment, ClassSummary } from "./types.js";
 
-function classesToMap(classes: ClassSummary[]): Map<string, ClassSummary> {
-  const m = new Map<string, ClassSummary>();
-  for (const c of classes) {
-    m.set(c.name ?? "", c);
+export type CompareResult<T> = {
+  removed: T[];
+  added: T[];
+  changed: [T, T][];
+};
+
+export function toMapGeneric<K extends keyof T, T extends {}, D>(
+  keyProp: K,
+  values: T[],
+  defaultKey: NonNullable<D>
+): Map<NonNullable<T[K]> | D, T> {
+  const m = new Map<NonNullable<T[K] | D>, T>();
+  for (const c of values) {
+    m.set(c[keyProp] ?? defaultKey, c);
   }
   return m;
 }
 
-export type CompareResult = {
-  removed: ClassSummary[];
-  added: ClassSummary[];
-  changed: [ClassSummary, ClassSummary][];
-};
-
-export function compareData(
-  // TODO: fix this type to be shared between notifications.ts and here
-  oldData: { classes: ClassSummary[] },
-  newData: ClassSummary[]
-): CompareResult {
-  const oldClasses = classesToMap(oldData.classes);
-  const newClasses = classesToMap(newData);
-  const added = new Map(newClasses);
+export function compareDataGeneric<K extends keyof T, T extends {}, D>(
+  keyProp: K,
+  defaultKey: NonNullable<D>,
+  oldData: T[],
+  newData: T[]
+): CompareResult<T> {
+  const oldMap = toMapGeneric(keyProp, oldData, defaultKey);
+  const newMap = toMapGeneric(keyProp, newData, defaultKey);
+  const added = new Map(newMap);
 
   const removed = [];
   const remained = [];
-  for (const [name, c] of oldClasses.entries()) {
-    if (newClasses.has(name)) {
-      remained.push(c);
-      added.delete(name);
+  for (const [k, v] of oldMap.entries()) {
+    if (newMap.has(k)) {
+      remained.push(v);
+      added.delete(k);
     } else {
-      removed.push(c);
+      removed.push(v);
     }
   }
   const changed = remained
-    .filter((c) => newClasses.get(c.name ?? "")! != c)
-    .map((c): [ClassSummary, ClassSummary] => [
-      c,
-      newClasses.get(c.name ?? "")!,
-    ]);
+    .filter((v) => newMap.get(v[keyProp] ?? defaultKey)! != v)
+    .map((v): [T, T] => [v, newMap.get(v[keyProp] ?? defaultKey)!]);
   return { removed, added: Array.from(added.values()), changed };
+}
+
+export function compareClasses(
+  oldData: ClassSummary[],
+  newData: ClassSummary[]
+): CompareResult<ClassSummary> {
+  return compareDataGeneric("name", "", oldData, newData);
+}
+
+export function compareAssignments(
+  oldData: Assignment[],
+  newData: Assignment[]
+): CompareResult<Assignment> {
+  return compareDataGeneric("name", "", oldData, newData);
 }

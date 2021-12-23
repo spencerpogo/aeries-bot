@@ -81,8 +81,22 @@ function makeFakeClass(n: number): ClassData {
 
 const classes = [...Array(2).keys()].map(makeFakeClass);
 
+function calcGrade(c: ClassData) {
+  // we are assuming only one category so take the average of assignments scores.
+  const scores = c.assignments.map((a) => a.points / a.maxPoints);
+  return (scores.reduce((a, b) => a + b) / scores.length) * 100;
+}
+
+function formatGrade(grade: number) {
+  // we aren't going to mess with letter grades
+  return `A (${grade.toFixed(2)}%)`;
+}
+
 function getClassData(): SummaryData[] {
-  return classes.map((c) => c.data);
+  return classes.map((c) => ({
+    ...c.data,
+    CurrentMarkAndScore: formatGrade(calcGrade(c)),
+  }));
 }
 
 app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {

@@ -29,3 +29,5 @@ export interface ClassSummary {
   gradeSummary: string; // CurrentMarkAndScore
   missing: string; // regex match ">(.*)<" or getTextFromHtml(MissingAssignments)
 }
+
+export type ClassWithAssignments = ClassSummary & { assignments: Assignment[] };

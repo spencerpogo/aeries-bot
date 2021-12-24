@@ -3,11 +3,14 @@ import { User } from "@prisma/client";
 import { EmbedFieldData, Util } from "discord.js";
 import { AeriesClient, getClient } from "./aeries.js";
 import { client } from "./client.js";
-import { compareAssignments, compareClasses } from "./compareData.js";
+import {
+  classesToMap,
+  classesWithAssignmentsToMap,
+  compareAssignments,
+  compareClasses,
+} from "./compareData.js";
 import { prisma } from "./db.js";
-import { Assignment, ClassSummary } from "./types.js";
-
-type ClassWithAssignments = ClassSummary & { assignments: Assignment[] };
+import { Assignment, ClassSummary, ClassWithAssignments } from "./types.js";
 
 type GradesData = {
   classes: ClassWithAssignments[];
@@ -76,14 +79,53 @@ function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
   ];
 }
 
-function formatAddedAssignment(a: Assignment): EmbedFieldData {
+function formatAssignmentScore(a: Assignment): string {
+  return (
+    `${Util.escapeMarkdown(a.points?.toString() ?? "")}` +
+    ` / ${Util.escapeMarkdown(a.maxPoints?.toString() ?? "")}` +
+    ` (${Util.escapeMarkdown(a.percent)})`
+  );
+}
+
+function formatAddedAssignment(c: ClassSummary, a: Assignment): EmbedFieldData {
   return {
-    name: `${Util.escapeMarkdown(JSON.stringify(a.name.toString()))} Graded`,
-    value:
-      `Score: **${Util.escapeMarkdown(a.points?.toString() ?? "")}` +
-      ` / ${Util.escapeMarkdown(a.maxPoints?.toString() ?? "")}**` +
-      ` (${Util.escapeMarkdown(a.percent)})`,
+    name: `✅ ${Util.escapeMarkdown(
+      JSON.stringify(a.name.toString())
+    )} in ${formatClass(c)} Graded`,
+    value: `Score: **${formatAssignmentScore(a)}**`,
   };
+}
+
+function formatRemovedAssignment(
+  c: ClassSummary,
+  a: Assignment
+): EmbedFieldData {
+  return {
+    name:
+      `⛔ ` +
+      Util.escapeMarkdown(JSON.stringify(a.name)) +
+      ` in ${formatClass(c)} deleted`,
+    value: `Original score: ${formatAssignmentScore(a)}`,
+  };
+}
+
+function formatChangedAssignment(
+  c: ClassSummary,
+  old: Assignment,
+  newA: Assignment
+): EmbedFieldData[] {
+  if (old.percent == newA.percent) return [];
+  return [
+    {
+      name:
+        `Grade changed on ` +
+        Util.escapeMarkdown(JSON.stringify(old.name)) +
+        ` in ${formatClass(c)}`,
+      value: `${formatAssignmentScore(
+        old
+      )} :arrow_right: ${formatAssignmentScore(newA)}`,
+    },
+  ];
 }
 
 function getCachedData(user: User): GradesData | null {
@@ -100,14 +142,15 @@ async function processNewUser(
   classes: ClassSummary[],
   client: AeriesClient
 ) {
+  console.log(`Generating first-time data for ${user.discordId}`);
   // we already have the classes, so now fetch the assignments for each class.
   const newClasses: ClassWithAssignments[] = [];
-  for (const c of classes) {
+  for (const c of classes.values()) {
     newClasses.push({
       ...c,
-      assignments: c.gradebookUrl
-        ? await client.getAssignments(c.gradebookUrl)
-        : [],
+      assignments: Array.from(
+        (await client.getAssignments(c.gradebookUrl)).values()
+      ),
     });
   }
   const newData: GradesData = { classes: newClasses };
@@ -119,14 +162,23 @@ async function processNewUser(
   });
 }
 
-function getAssignmentsMap(
-  classes: ClassWithAssignments[]
-): Map<string, Assignment[]> {
-  const m = new Map<string, Assignment[]>();
-  for (const c of classes) {
-    m.set(c.name ?? "", c.assignments);
+export async function mergeNewClassSummary(
+  oldData: ClassWithAssignments[],
+  newData: ClassSummary[],
+  missing: (c: ClassSummary) => Promise<Assignment[]>
+): Promise<Map<string, ClassWithAssignments[]>> {
+  const oldMap: Map<string, ClassWithAssignments> =
+    classesWithAssignmentsToMap(oldData);
+  const newMap: Map<string, ClassSummary> = classesToMap(newData);
+  const r = new Map();
+  for (const [k, v] of newMap.entries()) {
+    const base: ClassWithAssignments = oldMap.get(k) ?? {
+      ...v,
+      assignments: await missing(v),
+    };
+    r.set(k, { ...base, ...v });
   }
-  return m;
+  return r;
 }
 
 async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
@@ -142,39 +194,56 @@ async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
     return [];
   }
 
-  // this might have some weird edge cases lol
-  const { removed, added, changed } = compareClasses(oldData.classes, classes);
   // merge the old assignments data and the new class data
-  const assignmentsMap = getAssignmentsMap(oldData.classes);
-  const classesMap = new Map<string, ClassWithAssignments>();
-  for (const c of classes) {
-    classesMap.set(c.name ?? "", {
-      ...c,
-      // in case the class is new the assignments will be added here
+  const oldMap: Map<string, ClassWithAssignments> = classesWithAssignmentsToMap(
+    oldData.classes
+  );
+  const newMap: Map<string, ClassSummary> = classesToMap(classes);
+  const classesWithAssignments = new Map<string, ClassWithAssignments>();
+  for (const [k, v] of newMap.entries()) {
+    classesWithAssignments.set(k, {
+      ...v,
+      // if this class was just added and we don't have the assignments for it yet,
+      //  fetch them.
       assignments:
-        assignmentsMap.get(c.name ?? "") ??
-        (c.gradebookUrl ? await client.getAssignments(c.gradebookUrl) : []),
+        oldMap.get(k)?.assignments ??
+        (await client.getAssignments(v.gradebookUrl)),
     });
   }
+
+  const { removed, added, changed } = compareClasses(oldData.classes, classes);
+  // for every class that changed, compare the cached assignments to the current
+  //  assignments
   let assignmentEmbeds: EmbedFieldData[] = [];
   for (const [oldClass, newClass] of changed) {
-    if (!newClass.gradebookUrl) continue;
-    const oldAssignments = assignmentsMap.get(oldClass.name ?? "")!;
+    // sanity check. This should always pass due to the implementation of
+    //  compareClasses
+    if (oldClass.name !== newClass.name) continue;
+    const oldAssignments = classesWithAssignments.get(
+      newClass.name
+    )!.assignments;
     const newAssignments = await client.getAssignments(newClass.gradebookUrl);
-    classesMap.set(newClass.name ?? "", {
-      ...classesMap.get(newClass.name ?? "")!,
+    // record the new assignmnets to be stored in the DB later
+    classesWithAssignments.set(newClass.name, {
+      ...newClass,
       assignments: newAssignments,
     });
     const { added, removed, changed } = compareAssignments(
       oldAssignments,
       newAssignments
     );
-    assignmentEmbeds = assignmentEmbeds.concat(added.map());
+    assignmentEmbeds = assignmentEmbeds
+      .concat(added.map((a) => formatAddedAssignment(newClass, a)))
+      .concat(removed.map((a) => formatRemovedAssignment(newClass, a)))
+      .concat(
+        changed.flatMap(([a, b]) => formatChangedAssignment(newClass, a, b))
+      );
   }
 
-  const embeds = assignmentEmbeds
-    .concat(removed.map(formatRemoved))
+  const embeds = removed
+    .map(formatRemoved)
     .concat(added.map(formatAdded))
+    .concat(assignmentEmbeds) // put assignment changes above the grade change
     .concat(changed.flatMap(([a, b]) => formatChanged(a, b)));
   return embeds;
 }

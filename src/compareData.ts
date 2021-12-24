@@ -1,4 +1,4 @@
-import { Assignment, ClassSummary } from "./types.js";
+import { Assignment, ClassSummary, ClassWithAssignments } from "./types.js";
 
 export type CompareResult<T> = {
   removed: T[];
@@ -6,6 +6,7 @@ export type CompareResult<T> = {
   changed: [T, T][];
 };
 
+// TODO: No need to do nullish coallescing anymore so this can be simplified
 export function toMapGeneric<K extends keyof T, T extends {}, D>(
   keyProp: K,
   values: T[],
@@ -42,6 +43,18 @@ export function compareDataGeneric<K extends keyof T, T extends {}, D>(
     .filter((v) => newMap.get(v[keyProp] ?? defaultKey)! != v)
     .map((v): [T, T] => [v, newMap.get(v[keyProp] ?? defaultKey)!]);
   return { removed, added: Array.from(added.values()), changed };
+}
+
+export function classesToMap(classes: ClassSummary[]) {
+  return toMapGeneric("name", classes, "");
+}
+
+export function classesWithAssignmentsToMap(classes: ClassWithAssignments[]) {
+  return toMapGeneric("name", classes, "");
+}
+
+export function assignmentsToMap(assignments: Assignment[]) {
+  return toMapGeneric("name", assignments, "");
 }
 
 export function compareClasses(

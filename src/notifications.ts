@@ -283,8 +283,6 @@ export async function sendNotifications() {
       await processUser(user);
     } catch (e) {
       // TODO: Handle login errors
-      // Don't crash the entire process on error
-      // TODO: log these with a webhook
       await logError(e);
       continue;
     }

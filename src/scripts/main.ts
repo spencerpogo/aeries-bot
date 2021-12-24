@@ -2,6 +2,7 @@ import { CommandInteraction } from "discord.js";
 import { COMMANDS } from "../allCommands.js";
 import { client } from "../client.js";
 import { CONFIG } from "../config.js";
+import { logError } from "../logging.js";
 import { sendNotifications } from "../notifications.js";
 import { CommandType } from "../types";
 
@@ -12,6 +13,7 @@ for (const cmd of COMMANDS) {
 
 async function handleCommandError(interaction: CommandInteraction, e: any) {
   console.error(`Error in command ${interaction.commandName}`, e);
+  await logError(e);
   const msg = "An unexpected error occurred while running that command";
   if (interaction.deferred || interaction.replied) {
     await interaction.editReply(msg);

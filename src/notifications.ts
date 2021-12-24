@@ -10,6 +10,7 @@ import {
   compareClasses,
 } from "./compareData.js";
 import { prisma } from "./db.js";
+import { logError } from "./logging.js";
 import { Assignment, ClassSummary, ClassWithAssignments } from "./types.js";
 
 type GradesData = {
@@ -287,7 +288,7 @@ export async function sendNotifications() {
       // TODO: Handle login errors
       // Don't crash the entire process on error
       // TODO: log these with a webhook
-      console.error(e);
+      await logError(e);
       continue;
     }
   }

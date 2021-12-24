@@ -260,7 +260,7 @@ async function sendAlert(discordId: string, embeds: EmbedFieldData[]) {
   if (!embeds.length) return;
   const user = await client.users.fetch(discordId);
   await user.send({
-    content: "Grade alert",
+    content: ":warning: Grade Alert!",
     embeds: [new Embed().addFields(...embeds)],
   });
 }

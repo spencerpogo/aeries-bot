@@ -77,7 +77,13 @@ function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
 }
 
 function formatAddedAssignment(a: Assignment): EmbedFieldData {
-  return { name: "Assignment Graded" };
+  return {
+    name: `${Util.escapeMarkdown(JSON.stringify(a.name.toString()))} Graded`,
+    value:
+      `Score: **${Util.escapeMarkdown(a.points?.toString() ?? "")}` +
+      ` / ${Util.escapeMarkdown(a.maxPoints?.toString() ?? "")}**` +
+      ` (${Util.escapeMarkdown(a.percent)})`,
+  };
 }
 
 function getCachedData(user: User): GradesData | null {

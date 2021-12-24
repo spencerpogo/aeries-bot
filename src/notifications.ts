@@ -240,6 +240,14 @@ async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
       );
   }
 
+  const newData: GradesData = {
+    classes: Array.from(classesWithAssignments.values()),
+  };
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { notificationsCache: JSON.stringify(newData) },
+  });
+
   const embeds = removed
     .map(formatRemoved)
     .concat(added.map(formatAdded))

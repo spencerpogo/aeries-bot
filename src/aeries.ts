@@ -54,6 +54,7 @@ export class AeriesClient {
   }
 
   async login(username: string, password: string) {
+    console.log(`[Aeries] Login ${username}`);
     const body: string = queryStringify({
       checkCookiesEnabled: true,
       checkMobileDevice: false,
@@ -85,6 +86,7 @@ export class AeriesClient {
   }
 
   async getRawClassSummary(): Promise<any> {
+    console.log(`[Aeries] Fetch classSummary`);
     const res = await this.fetch(
       this.baseURL + "/Widgets/ClassSummary/GetClassSummary?IsProfile=True",
       {
@@ -137,6 +139,7 @@ export class AeriesClient {
   }
 
   async getAssignments(gradebookUrl: string): Promise<Assignment[]> {
+    console.log(`[Aeries] Fetch assignments for ${gradebookUrl}`);
     // Aeries is very weird and will throw an error if SC is not set, yet they don't
     //  include it in the URLs returned by the ClassSummary widget.
     const url = new URL(this.baseURL + "/" + gradebookUrl);

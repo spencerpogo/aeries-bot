@@ -118,9 +118,10 @@ function formatChangedAssignment(
         `Grade changed on ` +
         Util.escapeMarkdown(JSON.stringify(old.name)) +
         ` in ${formatClass(c)}`,
-      value: `${formatAssignmentScore(
-        old
-      )} :arrow_right: ${formatAssignmentScore(newA)}`,
+      value:
+        formatAssignmentScore(old) +
+        " :arrow_right: " +
+        formatAssignmentScore(newA),
     },
   ];
 }

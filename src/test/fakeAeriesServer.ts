@@ -75,11 +75,19 @@ function makeFakeClass(n: number): ClassData {
       CurrentMarkAndScore: "F (69.42%)",
       NumMissingAssignments: 42,
     },
-    assignments: [...Array(2).keys()].map(makeFakeAssignment),
+    assignments: [...Array(1).keys()].map(makeFakeAssignment),
   };
 }
 
 const classes = [...Array(2).keys()].map(makeFakeClass);
+
+function updateAssignments(c: ClassData) {
+  c.assignments = c.assignments.map((i) => ({
+    ...i,
+    points: Math.floor(Math.random() * 100),
+    maxPoints: 100,
+  }));
+}
 
 function calcGrade(c: ClassData) {
   // we are assuming only one category so take the average of assignments scores.
@@ -101,15 +109,12 @@ function getClassData(): SummaryData[] {
 
 app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {
   if (!authed(req)) return res.status(401).end("auth pls");
+  for (const c of classes) {
+    updateAssignments(c);
+  }
   const data: SummaryData[] = getClassData();
   res.json(data);
 });
-
-let i: Record<number, number> = {};
-function getAssignments(c: ClassData): Assignment[] {
-  i[c.id] = ((i[c.id] ?? 0) + 1) % c.assignments.length;
-  return [c.assignments[i[c.id]]];
-}
 
 function formatScoreTable(points: number, maxPoints: Number) {
   const content = [points, " / ", maxPoints]
@@ -149,7 +154,7 @@ app.get(`/${portalName}/class/:id`, (req, res) => {
   const [c] = matches;
 
   // we do a little bit of "XSS"
-  const tableContent = getAssignments(c).map(formatAssignmentAsRow).join("\n");
+  const tableContent = c.assignments.map(formatAssignmentAsRow).join("\n");
   return res.send(`<div id="ctl00_MainContent_subGBS_tblEverything">
   <table class="GradebookDetailsTable">
   <tbody>

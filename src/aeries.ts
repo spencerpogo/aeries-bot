@@ -144,6 +144,7 @@ export class AeriesClient {
     //  include it in the URLs returned by the ClassSummary widget.
     const url = new URL(this.baseURL + "/" + gradebookUrl);
     url.searchParams.set("SC", "42");
+    url.pathname = url.pathname.replaceAll("//", "/");
 
     const res = await this.fetch(url.toString(), {
       headers: { "user-agent": userAgent },

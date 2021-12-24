@@ -1,4 +1,4 @@
-import { Embed } from "@discordjs/builders";
+import { bold, codeBlock, Embed } from "@discordjs/builders";
 import { User } from "@prisma/client";
 import { EmbedFieldData, Util } from "discord.js";
 import { AeriesClient, getClient } from "./aeries.js";
@@ -25,10 +25,6 @@ function formatClass(c: ClassSummary): string {
   );
 }
 
-function codeblock(lang: string, val: string) {
-  return `\`\`\`${lang}\n${Util.escapeCodeBlock(val)}\n\`\`\``;
-}
-
 function parseGradeSummary(gradeSummary: string): number | null {
   const m = /.*\(((\d*\.)?\d+)%\)/g.exec(gradeSummary);
   if (!m) return null;
@@ -39,14 +35,14 @@ function parseGradeSummary(gradeSummary: string): number | null {
 function formatRemoved(c: ClassSummary): EmbedFieldData {
   return {
     name: "Class Removed",
-    value: codeblock("diff", `- ${formatClass(c)}`),
+    value: codeBlock("diff", Util.escapeCodeBlock(`- ${formatClass(c)}`)),
   };
 }
 
 function formatAdded(c: ClassSummary): EmbedFieldData {
   return {
     name: "Class Added",
-    value: codeblock("diff", `+ ${formatClass(c)}`),
+    value: codeBlock("diff", Util.escapeCodeBlock(`+ ${formatClass(c)}`)),
   };
 }
 
@@ -75,7 +71,7 @@ function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
       value:
         Util.escapeMarkdown(old.gradeSummary) +
         " :arrow_right: " +
-        `**${Util.escapeMarkdown(c.gradeSummary)}**`,
+        bold(Util.escapeMarkdown(c.gradeSummary)),
     },
   ];
 }
@@ -93,7 +89,7 @@ function formatAddedAssignment(c: ClassSummary, a: Assignment): EmbedFieldData {
     name: `✅ ${Util.escapeMarkdown(
       JSON.stringify(a.name.toString())
     )} in ${formatClass(c)} graded`,
-    value: `Score: **${formatAssignmentScore(a)}**`,
+    value: `Score: ${bold(formatAssignmentScore(a))}`,
   };
 }
 

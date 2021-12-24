@@ -20,12 +20,15 @@ async function handler(interaction: CommandInteraction) {
   }
 
   await interaction.deferReply({ ephemeral: true });
-  // TODO: Delete notificationsCache on notifications disable
 
   try {
     await prisma.user.update({
       where: { discordId: interaction.user.id },
-      data: { notificationsEnabled },
+      data: {
+        notificationsEnabled,
+        // when disabling notifications, delete the notifications cache
+        ...(notificationsEnabled ? {} : { notificationsCache: null }),
+      },
     });
   } catch (e) {
     if (e instanceof PrismaClientKnownRequestError && e.code == "P2025") {

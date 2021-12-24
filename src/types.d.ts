@@ -22,10 +22,10 @@ export interface Assignment {
 }
 
 export interface ClassSummary {
-  gradebookUrl: string | null; // parse(Gradebook)
-  name: string | undefined; // CourseName
-  teacher: string | undefined; // TeacherName
-  period: string | undefined; // PeriodTitle or Period.toString()
-  gradeSummary: string | undefined; // CurrentMarkAndScore
-  missing: string | undefined; // regex match ">(.*)<" or getTextFromHtml(MissingAssignments)
+  gradebookUrl: string; // parse(Gradebook)
+  name: string; // CourseName
+  teacher: string; // TeacherName
+  period: string; // PeriodTitle or Period.toString()
+  gradeSummary: string; // CurrentMarkAndScore
+  missing: string; // regex match ">(.*)<" or getTextFromHtml(MissingAssignments)
 }

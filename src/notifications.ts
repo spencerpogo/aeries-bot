@@ -91,7 +91,7 @@ function formatAddedAssignment(c: ClassSummary, a: Assignment): EmbedFieldData {
   return {
     name: `✅ ${Util.escapeMarkdown(
       JSON.stringify(a.name.toString())
-    )} in ${formatClass(c)} Graded`,
+    )} in ${formatClass(c)} graded`,
     value: `Score: **${formatAssignmentScore(a)}**`,
   };
 }

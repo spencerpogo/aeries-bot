@@ -47,7 +47,7 @@ export class AeriesClient {
     );
   }
 
-  async _checkResponse(r: Response) {
+  _checkResponse(r: Response) {
     if (r.status != 200) {
       throw new Error(`Request failed with status code ${r.status}`);
     }

@@ -105,6 +105,12 @@ app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {
   res.json(data);
 });
 
+let i: Record<number, number> = {};
+function getAssignments(c: ClassData): Assignment[] {
+  i[c.id] = ((i[c.id] ?? 0) + 1) % c.assignments.length;
+  return [c.assignments[i[c.id]]];
+}
+
 function formatScoreTable(points: number, maxPoints: Number) {
   const content = [points, " / ", maxPoints]
     .map((i) => `<td>${i}</td>`)
@@ -138,11 +144,12 @@ app.get(`/${portalName}/class/:id`, (req, res) => {
   if (!authed(req)) return res.status(401).end("auth pls");
   const id = Number(req.params.id);
   const matches = classes.filter((c) => c.id == id);
+  console.log(matches);
   if (matches.length !== 1) return res.status(404).end("Class not found");
   const [c] = matches;
 
   // we do a little bit of "XSS"
-  const tableContent = c.assignments.map(formatAssignmentAsRow).join("\n");
+  const tableContent = getAssignments(c).map(formatAssignmentAsRow).join("\n");
   return res.send(`<div id="ctl00_MainContent_subGBS_tblEverything">
   <table class="GradebookDetailsTable">
   <tbody>

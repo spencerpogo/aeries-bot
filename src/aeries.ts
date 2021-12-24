@@ -107,7 +107,7 @@ export class AeriesClient {
     return linkHref;
   }
 
-  async getClasses(): Promise<Map<string, ClassSummary>> {
+  async getClasses(): Promise<ClassSummary[]> {
     const data = await this.getRawClassSummary();
     const classes: ClassSummary[] = Array.from(data)
       .map((period: any): ClassSummary | null => {
@@ -133,16 +133,10 @@ export class AeriesClient {
         };
       })
       .filter((c): c is ClassSummary => c !== null);
-    // convert to map
-    const classesMap = new Map();
-    for (const c of classes) {
-      // we don't handle duplicate names for now.
-      classesMap.set(c.name, c);
-    }
-    return classesMap;
+    return classes;
   }
 
-  async getAssignments(gradebookUrl: string): Promise<Map<string, Assignment>> {
+  async getAssignments(gradebookUrl: string): Promise<Assignment[]> {
     // Aeries is very weird and will throw an error if SC is not set, yet they don't
     //  include it in the URLs returned by the ClassSummary widget.
     const url = new URL(this.baseURL + "/" + gradebookUrl);
@@ -201,12 +195,7 @@ export class AeriesClient {
         };
       })
       .filter((i): i is Assignment => i !== null);
-    const assignmentsMap = new Map();
-    for (const a of assignments) {
-      // we don't handle duplicate names for now.
-      assignmentsMap.set(a.name, a);
-    }
-    return assignmentsMap;
+    return assignments;
   }
 }
 

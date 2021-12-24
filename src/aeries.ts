@@ -107,32 +107,42 @@ export class AeriesClient {
     return linkHref;
   }
 
-  async getClasses() {
+  async getClasses(): Promise<Map<string, ClassSummary>> {
     const data = await this.getRawClassSummary();
-    return Array.from(data).map((period: any): ClassSummary => {
-      const {
-        Gradebook,
-        CourseName,
-        TeacherName,
-        PeriodTitle,
-        CurrentMarkAndScore,
-        NumMissingAssignments,
-      } = period;
-      return {
-        gradebookUrl: this.parseGradebook(Gradebook),
-        name: CourseName,
-        teacher: TeacherName,
-        period: PeriodTitle,
-        gradeSummary: CurrentMarkAndScore,
-        missing:
-          typeof NumMissingAssignments === "number"
-            ? NumMissingAssignments.toString()
-            : undefined,
-      };
-    });
+    const classes: ClassSummary[] = Array.from(data)
+      .map((period: any): ClassSummary | null => {
+        const {
+          Gradebook,
+          CourseName,
+          TeacherName,
+          PeriodTitle,
+          CurrentMarkAndScore,
+          NumMissingAssignments,
+        } = period;
+        const gradebookUrl = this.parseGradebook(Gradebook);
+        if (!gradebookUrl) return null;
+        const missing = Number(NumMissingAssignments);
+        if (isNaN(missing)) return null;
+        return {
+          gradebookUrl,
+          name: CourseName,
+          teacher: TeacherName,
+          period: PeriodTitle,
+          gradeSummary: CurrentMarkAndScore,
+          missing: missing.toString(),
+        };
+      })
+      .filter((c): c is ClassSummary => c !== null);
+    // convert to map
+    const classesMap = new Map();
+    for (const c of classes) {
+      // we don't handle duplicate names for now.
+      classesMap.set(c.name, c);
+    }
+    return classesMap;
   }
 
-  async getAssignments(gradebookUrl: string): Promise<Assignment[]> {
+  async getAssignments(gradebookUrl: string): Promise<Map<string, Assignment>> {
     // Aeries is very weird and will throw an error if SC is not set, yet they don't
     //  include it in the URLs returned by the ClassSummary widget.
     const url = new URL(this.baseURL + "/" + gradebookUrl);
@@ -149,7 +159,7 @@ export class AeriesClient {
         "table.GradebookDetailsTable " +
         "tr.assignment-info"
     );
-    return assignmentRows
+    const assignments = assignmentRows
       .get()
       .map((row): Assignment | null => {
         const cells = $(row).children("td");
@@ -191,6 +201,12 @@ export class AeriesClient {
         };
       })
       .filter((i): i is Assignment => i !== null);
+    const assignmentsMap = new Map();
+    for (const a of assignments) {
+      // we don't handle duplicate names for now.
+      assignmentsMap.set(a.name, a);
+    }
+    return assignmentsMap;
   }
 }
 

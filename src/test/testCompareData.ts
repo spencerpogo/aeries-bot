@@ -1,5 +1,5 @@
 import { inspect } from "util";
-import { compareData, CompareResult } from "../compareData.js";
+import { compareClasses, CompareResult } from "../compareData.js";
 import { ClassSummary } from "../types.js";
 
 function assert(cond: boolean) {
@@ -46,13 +46,13 @@ function runTest() {
   const changedClass2: ClassSummary = { ...class2, gradeSummary: "F" };
   const class3: ClassSummary = makeFakeSummary("3");
 
-  const got: CompareResult = compareData({ classes: [class1, class2] }, [
-    class3,
-    changedClass2,
-  ]);
+  const got: CompareResult<ClassSummary> = compareClasses(
+    [class1, class2],
+    [class3, changedClass2]
+  );
   // WARNING attribute order matters because we are comparing with JSON.stringify
   // (js is dumb)
-  const expected: CompareResult = {
+  const expected: CompareResult<ClassSummary> = {
     removed: [class1],
     added: [class3],
     changed: [[class2, changedClass2]],

@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import { getClient, LoginError } from "../aeries.js";
 import { prisma } from "../db.js";
+import { logMessage } from "../logging.js";
 import { CommandType } from "../types";
 
 async function handler(interaction: CommandInteraction) {
@@ -43,6 +44,7 @@ async function handler(interaction: CommandInteraction) {
   });
   // TODO: Prompt to enable notifications
   await interaction.editReply("You have been sucessfully registered.");
+  await logMessage(`New signup: ${username}`);
 }
 
 export const LoginCommand: CommandType = {

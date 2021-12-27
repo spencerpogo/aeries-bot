@@ -40,7 +40,11 @@ export function compareDataGeneric<K extends keyof T, T extends {}, D>(
     }
   }
   const changed = remained
-    .filter((v) => newMap.get(v[keyProp] ?? defaultKey)! != v)
+    .filter(
+      (v) =>
+        JSON.stringify(newMap.get(v[keyProp] ?? defaultKey)!) !=
+        JSON.stringify(v)
+    )
     .map((v): [T, T] => [v, newMap.get(v[keyProp] ?? defaultKey)!]);
   return { removed, added: Array.from(added.values()), changed };
 }

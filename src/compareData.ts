@@ -22,7 +22,7 @@ export function toMapGeneric<K extends keyof T, T extends {}, D>(
 export function compareDataGeneric<K extends keyof T, T extends {}, D>(
   keyProp: K,
   defaultKey: NonNullable<D>,
-  compare: (a: T, b: T) => boolean,
+  equal: (a: T, b: T) => boolean,
   oldData: T[],
   newData: T[]
 ): CompareResult<T> {
@@ -41,7 +41,7 @@ export function compareDataGeneric<K extends keyof T, T extends {}, D>(
     }
   }
   const changed = remained
-    .filter((v) => compare(newMap.get(v[keyProp] ?? defaultKey)!, v))
+    .filter((v) => !equal(newMap.get(v[keyProp] ?? defaultKey)!, v))
     .map((v): [T, T] => [v, newMap.get(v[keyProp] ?? defaultKey)!]);
   return { removed, added: Array.from(added.values()), changed };
 }

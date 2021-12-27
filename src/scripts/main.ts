@@ -35,7 +35,8 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.on("ready", async () => {
-  console.log(`Sucessfully logged in as ${client.user?.tag ?? "??"}`);
+  console.log(`Sucessfully logged in as ${client.user!.tag}`);
+  client.user!.setActivity("grades", { type: "WATCHING" });
   sendNotifications();
 });
 

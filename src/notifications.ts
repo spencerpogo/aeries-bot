@@ -199,6 +199,7 @@ async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
   const newMap: Map<string, ClassSummary> = classesToMap(classes);
   const classesWithAssignments = new Map<string, ClassWithAssignments>();
   for (const [k, v] of newMap.entries()) {
+    console.log("Fetching missing assignments...");
     classesWithAssignments.set(k, {
       ...v,
       // if this class was just added and we don't have the assignments for it yet,
@@ -214,6 +215,7 @@ async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
   //  assignments
   let assignmentEmbeds: EmbedFieldData[] = [];
   for (const [oldClass, newClass] of changed) {
+    console.log("Fetching changed classes");
     // sanity check. This should always pass due to the implementation of
     //  compareClasses
     if (oldClass.name !== newClass.name) continue;

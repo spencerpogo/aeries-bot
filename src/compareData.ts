@@ -22,6 +22,7 @@ export function toMapGeneric<K extends keyof T, T extends {}, D>(
 export function compareDataGeneric<K extends keyof T, T extends {}, D>(
   keyProp: K,
   defaultKey: NonNullable<D>,
+  compare: (a: T, b: T) => boolean,
   oldData: T[],
   newData: T[]
 ): CompareResult<T> {
@@ -40,11 +41,7 @@ export function compareDataGeneric<K extends keyof T, T extends {}, D>(
     }
   }
   const changed = remained
-    .filter(
-      (v) =>
-        JSON.stringify(newMap.get(v[keyProp] ?? defaultKey)!) !=
-        JSON.stringify(v)
-    )
+    .filter((v) => compare(newMap.get(v[keyProp] ?? defaultKey)!, v))
     .map((v): [T, T] => [v, newMap.get(v[keyProp] ?? defaultKey)!]);
   return { removed, added: Array.from(added.values()), changed };
 }
@@ -65,12 +62,40 @@ export function compareClasses(
   oldData: ClassSummary[],
   newData: ClassSummary[]
 ): CompareResult<ClassSummary> {
-  return compareDataGeneric("name", "", oldData, newData);
+  return compareDataGeneric(
+    "name",
+    "",
+    (a, b) => {
+      return (
+        a.gradeSummary == b.gradeSummary &&
+        a.missing == b.missing &&
+        a.name == b.name &&
+        a.teacher == b.teacher
+      );
+    },
+    oldData,
+    newData
+  );
 }
 
 export function compareAssignments(
   oldData: Assignment[],
   newData: Assignment[]
 ): CompareResult<Assignment> {
-  return compareDataGeneric("name", "", oldData, newData);
+  return compareDataGeneric(
+    "name",
+    "",
+    (a, b) => {
+      return (
+        a.percent == b.percent &&
+        a.points == b.points &&
+        a.maxPoints == b.maxPoints &&
+        a.gradingComplete == b.gradingComplete &&
+        a.category == b.category &&
+        a.name == b.name
+      );
+    },
+    oldData,
+    newData
+  );
 }

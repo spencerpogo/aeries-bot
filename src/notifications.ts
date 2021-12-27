@@ -215,7 +215,7 @@ async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
   //  assignments
   let assignmentEmbeds: EmbedFieldData[] = [];
   for (const [oldClass, newClass] of changed) {
-    console.log("Fetching changed classes");
+    console.log("Fetching changed classes...");
     // sanity check. This should always pass due to the implementation of
     //  compareClasses
     if (oldClass.name !== newClass.name) continue;

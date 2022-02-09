@@ -50,10 +50,10 @@ type ClassData = {
   assignments: Assignment[];
 };
 
-function makeFakeAssignment(n: number): Assignment {
+function makeFakeAssignment(c: number, n: number): Assignment {
   return {
     id: n,
-    name: `assignment ${n}`,
+    name: `class ${c} assignment ${n}`,
     category: "assignments",
     points: 8,
     maxPoints: 20,
@@ -67,7 +67,6 @@ function makeFakeClass(n: number): ClassData {
   return {
     id: n,
     data: {
-      // TODO: Implement assignment checking
       Gradebook: `<a class="GradebookLink" href="/class/${n}">`,
       CourseName: `class ${n}`,
       TeacherName: `teacher ${n}`,
@@ -75,43 +74,38 @@ function makeFakeClass(n: number): ClassData {
       CurrentMarkAndScore: "F (69.42%)",
       NumMissingAssignments: 42,
     },
-    assignments: [...Array(1).keys()].map(makeFakeAssignment),
+    assignments: [...Array(1).keys()].map((i) => makeFakeAssignment(n, i)),
   };
 }
 
-const classes = [...Array(2).keys()].map(makeFakeClass);
+let classes = [...Array(2).keys()].map(makeFakeClass);
 
-function updateAssignments(c: ClassData) {
-  c.assignments = c.assignments.map((i) => ({
-    ...i,
-    points: Math.floor(Math.random() * 100),
-    maxPoints: 100,
-  }));
-}
-
-function calcGrade(c: ClassData) {
-  // we are assuming only one category so take the average of assignments scores.
-  const scores = c.assignments.map((a) => a.points / a.maxPoints);
-  return (scores.reduce((a, b) => a + b) / scores.length) * 100;
-}
-
-function formatGrade(grade: number) {
-  // we aren't going to mess with letter grades
-  return `A (${grade.toFixed(2)}%)`;
-}
-
-function getClassData(): SummaryData[] {
-  return classes.map((c) => ({
-    ...c.data,
-    CurrentMarkAndScore: formatGrade(calcGrade(c)),
+function getClassData() {
+  classes = classes.map((i) => {
+    // Shift ID by 1
+    const newID = (i.id + 1) % classes.length;
+    return {
+      ...i,
+      id: newID,
+      data: {
+        ...i.data,
+        Gradebook: `<a class="GradebookLink" href="/class/${newID}">`,
+      },
+      assignments: i.assignments.map((a) => ({
+        ...a,
+        points: Math.round(Math.random() * 100),
+        maxPoints: 100,
+      })),
+    };
+  });
+  return classes.map((i) => ({
+    ...i.data,
+    CurrentMarkAndScore: `F (${Math.round(Math.random() * 10000) / 100})`,
   }));
 }
 
 app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {
   if (!authed(req)) return res.status(401).end("auth pls");
-  for (const c of classes) {
-    updateAssignments(c);
-  }
   const data: SummaryData[] = getClassData();
   res.json(data);
 });

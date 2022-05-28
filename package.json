@@ -10,6 +10,7 @@
   "private": true,
   "scripts": {
     "watch": "tsc -w",
+    "build": "tsc",
     "start": "node ./dist/scripts/main.js",
     "mockserver": "nodemon ./dist/test/fakeAeriesServer.js"
   },

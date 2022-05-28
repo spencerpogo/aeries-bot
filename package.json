@@ -20,6 +20,7 @@
     "arg": "^5.0.1",
     "express": "^4.17.2",
     "nodemon": "^2.0.15",
+    "prettier": "^2.6.2",
     "prisma": "3.5.0",
     "typescript": "^4.5.3"
   },

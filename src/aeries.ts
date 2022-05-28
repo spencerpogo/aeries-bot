@@ -143,7 +143,9 @@ export class AeriesClient {
     // Aeries is very weird and will throw an error if SC is not set, yet they don't
     //  include it in the URLs returned by the ClassSummary widget.
     const url = new URL(this.baseURL + "/" + gradebookUrl);
-    url.searchParams.set("SC", "42");
+    if (!url.searchParams.has("SC")) {
+      url.searchParams.set("SC", "42");
+    }
     url.pathname = url.pathname.replaceAll("//", "/");
 
     const res = await this.fetch(url.toString(), {

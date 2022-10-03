@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/index.js";
-import { CommandInteraction } from "discord.js";
+import { CacheType, ChatInputCommandInteraction } from "discord.js";
 import { prisma } from "../db.js";
 import { CommandType } from "../types";
 
-async function handler(interaction: CommandInteraction) {
+async function handler(interaction: ChatInputCommandInteraction<CacheType>) {
   const subcmd = interaction.options.getSubcommand();
   let notificationsEnabled = false;
   if (subcmd == "enable") {

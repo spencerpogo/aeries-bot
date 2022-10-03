@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, CacheType } from "discord.js";
 import { CommandType } from "../types";
 
 const MSG = [
@@ -15,7 +15,7 @@ const MSG = [
   "You can set up the bot using `/login`.",
 ].join("\n");
 
-async function handler(interaction: CommandInteraction) {
+async function handler(interaction: ChatInputCommandInteraction<CacheType>) {
   await interaction.reply(MSG);
 }
 

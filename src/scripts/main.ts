@@ -1,4 +1,4 @@
-import { CommandInteraction } from "discord.js";
+import { ActivityType, ChatInputCommandInteraction, CacheType } from "discord.js";
 import { COMMANDS } from "../allCommands.js";
 import { client } from "../client.js";
 import { CONFIG } from "../config.js";
@@ -11,7 +11,7 @@ for (const cmd of COMMANDS) {
   commandsMap.set(cmd.meta.name, cmd);
 }
 
-async function handleCommandError(interaction: CommandInteraction, e: any) {
+async function handleCommandError(interaction: ChatInputCommandInteraction<CacheType>, e: any) {
   console.error(`Error in command ${interaction.commandName}`, e);
   await logError(e);
   const msg = "An unexpected error occurred while running that command";
@@ -23,7 +23,7 @@ async function handleCommandError(interaction: CommandInteraction, e: any) {
 }
 
 client.on("interactionCreate", async (interaction) => {
-  if (interaction.isCommand()) {
+  if (interaction.isCommand() && interaction.isChatInputCommand()) {
     const cmd = await commandsMap.get(interaction.commandName);
     if (!cmd) return;
     try {
@@ -36,7 +36,7 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("ready", async () => {
   console.log(`Sucessfully logged in as ${client.user!.tag}`);
-  client.user!.setActivity("grades", { type: "WATCHING" });
+  client.user!.setActivity("grades", { type: ActivityType.Watching });
   sendNotifications();
 });
 

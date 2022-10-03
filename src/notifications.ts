@@ -1,6 +1,6 @@
-import { bold, codeBlock, Embed } from "@discordjs/builders";
+import { bold, codeBlock } from "@discordjs/builders";
 import { User } from "@prisma/client";
-import { EmbedFieldData, Util } from "discord.js";
+import { APIEmbedField, EmbedBuilder, escapeCodeBlock, escapeMarkdown } from "discord.js";
 import { AeriesClient, getClient } from "./aeries.js";
 import { client } from "./client.js";
 import {
@@ -19,9 +19,9 @@ type GradesData = {
 
 function formatClass(c: ClassSummary): string {
   return (
-    Util.escapeMarkdown(c.name ?? "?") +
+    escapeMarkdown(c.name ?? "?") +
     " - " +
-    Util.escapeMarkdown(c.teacher ?? "?")
+    escapeMarkdown(c.teacher ?? "?")
   );
 }
 
@@ -32,21 +32,21 @@ function parseGradeSummary(gradeSummary: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-function formatRemoved(c: ClassSummary): EmbedFieldData {
+function formatRemoved(c: ClassSummary): APIEmbedField {
   return {
     name: "Class Removed",
-    value: codeBlock("diff", Util.escapeCodeBlock(`- ${formatClass(c)}`)),
+    value: codeBlock("diff", escapeCodeBlock(`- ${formatClass(c)}`)),
   };
 }
 
-function formatAdded(c: ClassSummary): EmbedFieldData {
+function formatAdded(c: ClassSummary): APIEmbedField {
   return {
     name: "Class Added",
-    value: codeBlock("diff", Util.escapeCodeBlock(`+ ${formatClass(c)}`)),
+    value: codeBlock("diff", escapeCodeBlock(`+ ${formatClass(c)}`)),
   };
 }
 
-function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
+function formatChanged(old: ClassSummary, c: ClassSummary): APIEmbedField[] {
   // we only care about grade changes for now
   if (
     !old.gradeSummary ||
@@ -69,24 +69,24 @@ function formatChanged(old: ClassSummary, c: ClassSummary): EmbedFieldData[] {
     {
       name: `${prefix} in ${formatClass(c)}`,
       value:
-        Util.escapeMarkdown(old.gradeSummary) +
+        escapeMarkdown(old.gradeSummary) +
         " :arrow_right: " +
-        bold(Util.escapeMarkdown(c.gradeSummary)),
+        bold(escapeMarkdown(c.gradeSummary)),
     },
   ];
 }
 
 function formatAssignmentScore(a: Assignment): string {
   return (
-    `${Util.escapeMarkdown(a.points?.toString() ?? "")}` +
-    ` / ${Util.escapeMarkdown(a.maxPoints?.toString() ?? "")}` +
-    ` (${Util.escapeMarkdown(a.percent)})`
+    `${escapeMarkdown(a.points?.toString() ?? "")}` +
+    ` / ${escapeMarkdown(a.maxPoints?.toString() ?? "")}` +
+    ` (${escapeMarkdown(a.percent)})`
   );
 }
 
-function formatAddedAssignment(c: ClassSummary, a: Assignment): EmbedFieldData {
+function formatAddedAssignment(c: ClassSummary, a: Assignment): APIEmbedField {
   return {
-    name: `✅ ${Util.escapeMarkdown(
+    name: `✅ ${escapeMarkdown(
       JSON.stringify(a.name.toString())
     )} in ${formatClass(c)} graded`,
     value: `Score: ${bold(formatAssignmentScore(a))}`,
@@ -96,11 +96,11 @@ function formatAddedAssignment(c: ClassSummary, a: Assignment): EmbedFieldData {
 function formatRemovedAssignment(
   c: ClassSummary,
   a: Assignment
-): EmbedFieldData {
+): APIEmbedField {
   return {
     name:
       `⛔ ` +
-      Util.escapeMarkdown(JSON.stringify(a.name)) +
+      escapeMarkdown(JSON.stringify(a.name)) +
       ` in ${formatClass(c)} deleted`,
     value: `Original score: ${formatAssignmentScore(a)}`,
   };
@@ -110,13 +110,13 @@ function formatChangedAssignment(
   c: ClassSummary,
   old: Assignment,
   newA: Assignment
-): EmbedFieldData[] {
+): APIEmbedField[] {
   if (old.percent == newA.percent) return [];
   return [
     {
       name:
         `Grade changed on ` +
-        Util.escapeMarkdown(JSON.stringify(old.name)) +
+        escapeMarkdown(JSON.stringify(old.name)) +
         ` in ${formatClass(c)}`,
       value:
         formatAssignmentScore(old) +
@@ -179,7 +179,7 @@ export async function mergeNewClassSummary(
   return r;
 }
 
-async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
+async function getEmbedsForUser(user: User): Promise<APIEmbedField[]> {
   const client = getClient();
   await client.login(user.portalUsername, user.portalPassword);
   // we will need the latest class data no matter what
@@ -213,7 +213,7 @@ async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
   const { removed, added, changed } = compareClasses(oldData.classes, classes);
   // for every class that changed, compare the cached assignments to the current
   //  assignments
-  let assignmentEmbeds: EmbedFieldData[] = [];
+  let assignmentEmbeds: APIEmbedField[] = [];
   for (const [oldClass, newClass] of changed) {
     console.log("Fetching changed classes...");
     // sanity check. This should always pass due to the implementation of
@@ -259,12 +259,12 @@ async function getEmbedsForUser(user: User): Promise<EmbedFieldData[]> {
   return embeds;
 }
 
-async function sendAlert(discordId: string, embeds: EmbedFieldData[]) {
+async function sendAlert(discordId: string, embeds: APIEmbedField[]) {
   if (!embeds.length) return;
   const user = await client.users.fetch(discordId);
   await user.send({
     content: ":warning: Grade Alert!",
-    embeds: [new Embed().setColor(0x284b98).addFields(...embeds)],
+    embeds: [new EmbedBuilder().setColor(0x284b98).addFields(...embeds)],
   });
 }
 

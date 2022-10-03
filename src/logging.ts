@@ -1,5 +1,5 @@
-import { codeBlock, Embed } from "@discordjs/builders";
-import { Util, WebhookClient } from "discord.js";
+import { codeBlock } from "@discordjs/builders";
+import { EmbedBuilder, escapeCodeBlock, WebhookClient } from "discord.js";
 import { CONFIG } from "./config.js";
 
 const webhookClient = new WebhookClient({ url: CONFIG.LOG_WEBHOOK });
@@ -15,10 +15,10 @@ export async function logError(e: Error) {
   await webhookClient.send({
     content: CONFIG.LOG_MENTION,
     embeds: [
-      new Embed()
+      new EmbedBuilder()
         .setColor(0xff0000)
         .setTitle("Error")
-        .setDescription(codeBlock(Util.escapeCodeBlock(errText))),
+        .setDescription(codeBlock(escapeCodeBlock(errText))),
     ],
   });
 }

@@ -107,7 +107,7 @@ function getClassData() {
 app.get(`/${portalName}/Widgets/ClassSummary/GetClassSummary`, (req, res) => {
   if (!authed(req)) return res.status(401).end("auth pls");
   const data: SummaryData[] = getClassData();
-  res.json(data);
+  return res.json(data);
 });
 
 function formatScoreTable(points: number, maxPoints: Number) {

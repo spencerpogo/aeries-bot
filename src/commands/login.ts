@@ -1,18 +1,19 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, CacheType } from "discord.js";
 import { getClient, LoginError } from "../aeries.js";
 import { prisma } from "../db.js";
 import { logMessage } from "../logging.js";
 import { CommandType } from "../types";
 
-async function handler(interaction: CommandInteraction) {
+async function handler(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
   const username = interaction.options.getString("username");
   const password = interaction.options.getString("password");
   if (!username || !password) {
-    return await interaction.reply({
+    await interaction.reply({
       content: "Username and password are required",
       ephemeral: true,
     });
+    return;
   }
   await interaction.deferReply({ ephemeral: true });
   // Make sure the login works

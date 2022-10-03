@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/index.js";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, CacheType } from "discord.js";
 import { prisma } from "../db.js";
 import { logMessage } from "../logging.js";
 import { CommandType } from "../types";
 
-async function handler(interaction: CommandInteraction) {
+async function handler(interaction: ChatInputCommandInteraction<CacheType>) {
   await interaction.deferReply({ ephemeral: true });
 
   try {

@@ -1,6 +1,6 @@
 import { codeBlock } from "@discordjs/builders";
 import { EmbedBuilder, escapeCodeBlock, WebhookClient } from "discord.js";
-import { CONFIG } from "./config";
+import { CONFIG } from "./config.js";
 
 const webhookClient = new WebhookClient({ url: CONFIG.LOG_WEBHOOK });
 

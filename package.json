@@ -1,6 +1,7 @@
 {
   "name": "aeries-discord-bot",
   "version": "1.0.0",
+  "type": "module",
   "description": "Discord bot to alert about aeries grade changes ",
   "main": "src/index.ts",
   "repository": "https://github.com/Scoder12/aeries-discord-bot",
@@ -8,7 +9,7 @@
   "license": "AGPL-3.0-only",
   "private": true,
   "scripts": {
-    "dev": "nodemon ./src/scripts/main.ts",
+    "watch": "tsc -w",
     "build": "tsc",
     "start": "node ./dist/scripts/main.js",
     "mockserver": "nodemon ./dist/test/fakeAeriesServer.js"
@@ -22,7 +23,6 @@
     "nodemon": "^2.0.20",
     "prettier": "^2.7.1",
     "prisma": "^4.4.0",
-    "ts-node": "^10.9.1",
     "typescript": "^4.8.4"
   },
   "dependencies": {

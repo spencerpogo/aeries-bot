@@ -1,4 +1,4 @@
-import { Assignment, ClassSummary, ClassWithAssignments } from "./types";
+import { Assignment, ClassSummary, ClassWithAssignments } from "./types.js";
 
 export type CompareResult<T> = {
   removed: T[];

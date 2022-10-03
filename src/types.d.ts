@@ -1,8 +1,4 @@
-import {
-  CacheType,
-  ChatInputCommandInteraction,
-  CommandInteraction,
-} from "discord.js";
+import { CacheType, ChatInputCommandInteraction, CommandInteraction } from "discord.js";
 import { RESTPostAPIApplicationCommandsJSONBody } from "discord.js/node_modules/discord-api-types";
 
 export interface CommandMeta {
@@ -12,9 +8,7 @@ export interface CommandMeta {
 
 export type CommandType = {
   meta: CommandMeta;
-  handler: (
-    interaction: ChatInputCommandInteraction<CacheType>
-  ) => Promise<void>;
+  handler: (interaction: ChatInputCommandInteraction<CacheType>) => Promise<void>;
 };
 
 export interface Assignment {

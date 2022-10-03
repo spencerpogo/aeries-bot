@@ -1,13 +1,11 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ChatInputCommandInteraction, CacheType } from "discord.js";
-import { getClient, LoginError } from "../aeries";
-import { prisma } from "../db";
-import { logMessage } from "../logging";
+import { getClient, LoginError } from "../aeries.js";
+import { prisma } from "../db.js";
+import { logMessage } from "../logging.js";
 import { CommandType } from "../types";
 
-async function handler(
-  interaction: ChatInputCommandInteraction<CacheType>
-): Promise<void> {
+async function handler(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
   const username = interaction.options.getString("username");
   const password = interaction.options.getString("password");
   if (!username || !password) {

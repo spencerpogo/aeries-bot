@@ -1,4 +1,4 @@
-import { getClient } from "../aeries.js";
+import { getClient } from "../aeries";
 
 async function main() {
   const client = getClient();

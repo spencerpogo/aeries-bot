@@ -1,5 +1,5 @@
 import { mergeNewClassSummary } from "../notifications.js";
-import { Assignment, ClassSummary } from "../types.js";
+import { Assignment, ClassSummary } from "../types";
 
 function fakeClass(n: number): ClassSummary {
   return {
@@ -27,12 +27,14 @@ const class1: ClassSummary = fakeClass(1);
 const assignment1: Assignment = fakeAssignment(1);
 const assignment2: Assignment = fakeAssignment(2);
 
-console.log(
-  (
-    await mergeNewClassSummary(
-      [{ ...class1, assignments: [assignment1, assignment2] }],
-      [{ ...class1, gradeSummary: "A" }],
-      async () => [assignment2]
-    )
-  ).get(class1.name)
-);
+(async () => {
+  console.log(
+    (
+      await mergeNewClassSummary(
+        [{ ...class1, assignments: [assignment1, assignment2] }],
+        [{ ...class1, gradeSummary: "A" }],
+        async () => [assignment2]
+      )
+    ).get(class1.name)
+  );
+})();

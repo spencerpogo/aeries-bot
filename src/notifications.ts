@@ -1,6 +1,11 @@
 import { bold, codeBlock } from "@discordjs/builders";
 import { User } from "@prisma/client";
-import { APIEmbedField, EmbedBuilder, escapeCodeBlock, escapeMarkdown } from "discord.js";
+import {
+  APIEmbedField,
+  EmbedBuilder,
+  escapeCodeBlock,
+  escapeMarkdown,
+} from "discord.js";
 import { AeriesClient, getClient } from "./aeries.js";
 import { client } from "./client.js";
 import {
@@ -19,9 +24,7 @@ type GradesData = {
 
 function formatClass(c: ClassSummary): string {
   return (
-    escapeMarkdown(c.name ?? "?") +
-    " - " +
-    escapeMarkdown(c.teacher ?? "?")
+    escapeMarkdown(c.name ?? "?") + " - " + escapeMarkdown(c.teacher ?? "?")
   );
 }
 

@@ -2,7 +2,7 @@ import { Cheerio, load as cheerioLoad } from "cheerio";
 import fetchCookieWrapper from "fetch-cookie";
 import nodeFetch, { Response } from "node-fetch";
 import { stringify as queryStringify } from "qs";
-import { CONFIG } from "./config.js";
+import { CONFIG } from "./config";
 import { Assignment, ClassSummary } from "./types";
 
 type FetchFunction = typeof nodeFetch;

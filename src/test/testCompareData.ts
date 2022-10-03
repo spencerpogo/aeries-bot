@@ -1,6 +1,6 @@
 import { inspect } from "util";
-import { compareClasses, CompareResult } from "../compareData.js";
-import { ClassSummary } from "../types.js";
+import { compareClasses, CompareResult } from "../compareData";
+import { ClassSummary } from "../types";
 
 function assert(cond: boolean) {
   if (!cond) throw new Error("Assertion failed");

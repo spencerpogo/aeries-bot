@@ -1,8 +1,8 @@
-import { DeleteCommand } from "./commands/delete.js";
-import { HelloCommand } from "./commands/hello.js";
-import { LoginCommand } from "./commands/login.js";
-import { NotificationsCommand } from "./commands/notifications.js";
-import { SetupCommand } from "./commands/setup.js";
+import { DeleteCommand } from "./commands/delete";
+import { HelloCommand } from "./commands/hello";
+import { LoginCommand } from "./commands/login";
+import { NotificationsCommand } from "./commands/notifications";
+import { SetupCommand } from "./commands/setup";
 
 export const COMMANDS = [
   HelloCommand,

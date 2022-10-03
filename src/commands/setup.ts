@@ -8,7 +8,7 @@ const MSG = [
     " so that they can be fixed!",
   "2. You will be required to provide your Aeries password so the bot can log in to" +
     " your account. **You are trusting the bot owner to not view your password.** If" +
-    " you would like to host it yourself ask I and I can show you how!",
+    " you would like to host it yourself, it is open-source on GitHub: https://github.com/Scoder12/aeries-bot",
   "3. Use at your own risk! There is almost no chance you will get in any trouble for" +
     " using this but bot owner is not responsible if you do!",
   "",

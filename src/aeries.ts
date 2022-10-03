@@ -79,9 +79,9 @@ export class AeriesClient {
     );
     if (
       resp.status != 302 ||
-      resp.headers.get("location") != this.baseURL + "/Default.aspx"
+      !resp.headers.get("location")?.endsWith(this.portalName + "/Default.aspx")
     ) {
-      throw new LoginError("Aeries login failed. Check your credentials.");
+      throw new LoginError(`Aeries login failed. Check your credentials. Status: ${resp.status}`);
     }
   }
 

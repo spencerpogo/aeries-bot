@@ -4,8 +4,11 @@ import { getClient, LoginError } from "../aeries.js";
 import { prisma } from "../db.js";
 import { logMessage } from "../logging.js";
 import { CommandType } from "../types";
+import { NotificationsCommand } from "./notifications.js";
 
-async function handler(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+async function handler(
+  interaction: ChatInputCommandInteraction<CacheType>
+): Promise<void> {
   const username = interaction.options.getString("username");
   const password = interaction.options.getString("password");
   if (!username || !password) {
@@ -43,8 +46,10 @@ async function handler(interaction: ChatInputCommandInteraction<CacheType>): Pro
       notificationsEnabled: false,
     },
   });
-  // TODO: Prompt to enable notifications
-  await interaction.editReply("You have been sucessfully registered.");
+  await interaction.editReply(
+    "**You have been sucessfully registered.**\n\n" +
+      `Use \`/${NotificationsCommand.meta.name} enable\` to enable grade change notifications.`
+  );
   await logMessage(`New signup: ${username}`);
 }
 

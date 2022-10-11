@@ -1,9 +1,14 @@
-import { Cheerio, load as cheerioLoad } from "cheerio";
+import { Cheerio, CheerioAPI, load as cheerioLoad } from "cheerio";
 import fetchCookieWrapper from "fetch-cookie";
 import nodeFetch, { Response } from "node-fetch";
 import { stringify as queryStringify } from "qs";
 import { CONFIG } from "./config.js";
-import { Assignment, ClassSummary } from "./types";
+import {
+  Assignment,
+  CategoryData,
+  ClassSummary,
+  GradebookDetails,
+} from "./types";
 
 type FetchFunction = typeof nodeFetch;
 
@@ -81,7 +86,9 @@ export class AeriesClient {
       resp.status != 302 ||
       !resp.headers.get("location")?.endsWith(this.portalName + "/Default.aspx")
     ) {
-      throw new LoginError(`Aeries login failed. Check your credentials. Status: ${resp.status}`);
+      throw new LoginError(
+        `Aeries login failed. Check your credentials. Status: ${resp.status}`
+      );
     }
   }
 
@@ -138,22 +145,65 @@ export class AeriesClient {
     return classes;
   }
 
-  async getAssignments(gradebookUrl: string): Promise<Assignment[]> {
-    console.log(`[Aeries] Fetch assignments for ${gradebookUrl}`);
-    // Aeries is very weird and will throw an error if SC is not set, yet they don't
-    //  include it in the URLs returned by the ClassSummary widget.
-    const url = new URL(this.baseURL + "/" + gradebookUrl);
-    if (!url.searchParams.has("SC")) {
-      url.searchParams.set("SC", "42");
+  static _getCategoryData($: CheerioAPI): CategoryData[] {
+    const tables = $(".assignments-view").children("table");
+    if (tables.length !== 3)
+      throw new Error("expected 3 tables in main layout");
+    const rows = tables.eq(2).children("tbody").first().children("tr");
+    if (rows.length < 4) throw new Error("expected at least one category");
+    const columnNames = Array.from(rows.eq(1).children("td")).map((e) =>
+      trim($(e))
+    );
+    const categoryRows = rows.slice(2, rows.length - 1);
+    if (
+      ["Category", "Points", "Max", "Perc", "Mark"].every(
+        (e, i) => e == columnNames[i]
+      )
+    ) {
+      const percOfGrade = 100 / categoryRows.length;
+      return Array.from(categoryRows).map((r) => {
+        const [cat, points, max, _perc, _mark] = Array.from(
+          $(r).children("td")
+        ).map((e) => trim($(e)));
+        return {
+          cat,
+          percOfGrade,
+          points: parseFloat(points),
+          max: parseFloat(max),
+        };
+      });
     }
-    url.pathname = url.pathname.replaceAll("//", "/");
+    if (
+      ["Category", "Perc ofGrade", "Points", "Max", "Perc", "Mark"].every(
+        (e, i) => e == columnNames[i]
+      )
+    ) {
+      return Array.from(categoryRows).map((r) => {
+        const [cat, percOfGradeStr, points, max, _perc, _mark] = Array.from(
+          $(r).children("td")
+        ).map((e) => trim($(e)));
+        const m = /(\d+)(\.(\d+))?%/gm.exec(percOfGradeStr);
+        if (!m) throw new Error(`Unexpected grade weight format: ${m}`);
+        const [, intPart, , decPart] = m;
+        const percOfGrade = parseFloat(`${intPart}.${decPart || "0"}`);
+        return {
+          cat,
+          percOfGrade,
+          points: parseFloat(points),
+          max: parseFloat(max),
+        };
+      });
+    }
+    let dbg;
+    try {
+      dbg = JSON.stringify(columnNames);
+    } catch (e) {
+      dbg = e;
+    }
+    throw new Error(`Unexpected grade weights: ${dbg}`);
+  }
 
-    const res = await this.fetch(url.toString(), {
-      headers: { "user-agent": userAgent },
-    });
-    this._checkResponse(res);
-    const html = await res.text();
-    const $ = cheerioLoad(html);
+  static _getAssignments($: CheerioAPI): Assignment[] {
     const assignmentRows = $(
       "#ctl00_MainContent_subGBS_tblEverything " +
         "table.GradebookDetailsTable " +
@@ -202,6 +252,28 @@ export class AeriesClient {
       })
       .filter((i): i is Assignment => i !== null);
     return assignments;
+  }
+
+  async gradebookDetails(gradebookUrl: string): Promise<GradebookDetails> {
+    console.log(`[Aeries] Fetch assignments for ${gradebookUrl}`);
+    // Aeries is very weird and will throw an error if SC is not set, yet they don't
+    //  include it in the URLs returned by the ClassSummary widget.
+    const url = new URL(this.baseURL + "/" + gradebookUrl);
+    if (!url.searchParams.has("SC")) {
+      url.searchParams.set("SC", "42");
+    }
+    url.pathname = url.pathname.replaceAll("//", "/");
+
+    const res = await this.fetch(url.toString(), {
+      headers: { "user-agent": userAgent },
+    });
+    this._checkResponse(res);
+    const html = await res.text();
+    const $ = cheerioLoad(html);
+    return {
+      categories: AeriesClient._getCategoryData($),
+      assignments: AeriesClient._getAssignments($),
+    };
   }
 }
 

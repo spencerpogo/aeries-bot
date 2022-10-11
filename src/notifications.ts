@@ -1,6 +1,11 @@
 import { bold, codeBlock } from "@discordjs/builders";
 import { User } from "@prisma/client";
-import { APIEmbedField, EmbedBuilder, escapeCodeBlock, escapeMarkdown } from "discord.js";
+import {
+  APIEmbedField,
+  EmbedBuilder,
+  escapeCodeBlock,
+  escapeMarkdown,
+} from "discord.js";
 import { AeriesClient, getClient } from "./aeries.js";
 import { client } from "./client.js";
 import {
@@ -19,9 +24,7 @@ type GradesData = {
 
 function formatClass(c: ClassSummary): string {
   return (
-    escapeMarkdown(c.name ?? "?") +
-    " - " +
-    escapeMarkdown(c.teacher ?? "?")
+    escapeMarkdown(c.name ?? "?") + " - " + escapeMarkdown(c.teacher ?? "?")
   );
 }
 
@@ -147,7 +150,7 @@ async function processNewUser(
     newClasses.push({
       ...c,
       assignments: Array.from(
-        (await client.getAssignments(c.gradebookUrl)).values()
+        (await client.gradebookDetails(c.gradebookUrl)).assignments.values()
       ),
     });
   }
@@ -206,7 +209,7 @@ async function getEmbedsForUser(user: User): Promise<APIEmbedField[]> {
       //  fetch them.
       assignments:
         oldMap.get(k)?.assignments ??
-        (await client.getAssignments(v.gradebookUrl)),
+        (await client.gradebookDetails(v.gradebookUrl)).assignments,
     });
   }
 
@@ -222,7 +225,9 @@ async function getEmbedsForUser(user: User): Promise<APIEmbedField[]> {
     const oldAssignments = classesWithAssignments.get(
       newClass.name
     )!.assignments;
-    const newAssignments = await client.getAssignments(newClass.gradebookUrl);
+    const newAssignments = (
+      await client.gradebookDetails(newClass.gradebookUrl)
+    ).assignments;
     // record the new assignmnets to be stored in the DB later
     classesWithAssignments.set(newClass.name, {
       ...newClass,

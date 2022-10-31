@@ -42,6 +42,7 @@ type Assignment = {
   comment: string;
   gradingComplete: boolean;
   documents: string;
+  hidden: boolean;
 };
 
 type ClassData = {
@@ -60,6 +61,7 @@ function makeFakeAssignment(c: number, n: number): Assignment {
     comment: "hi",
     gradingComplete: true,
     documents: "",
+    hidden: n == 1 ? true : false,
   };
 }
 
@@ -74,7 +76,7 @@ function makeFakeClass(n: number): ClassData {
       CurrentMarkAndScore: "F (69.42%)",
       NumMissingAssignments: 42,
     },
-    assignments: [...Array(1).keys()].map((i) => makeFakeAssignment(n, i)),
+    assignments: [...Array(2).keys()].map((i) => makeFakeAssignment(n, i)),
   };
 }
 
@@ -93,7 +95,7 @@ function getClassData() {
       },
       assignments: i.assignments.map((a) => ({
         ...a,
-        points: Math.round(Math.random() * 100),
+        points: 10 * a.id + Math.floor(Math.random() * 11),
         maxPoints: 100,
       })),
     };
@@ -139,22 +141,62 @@ function formatAssignmentAsRow(a: Assignment) {
   return `<tr class="assignment-info">${cols}</tr>`;
 }
 
+function tr(...items: string[]): string {
+  return "<tr>" + items.map((i) => `<td>${i}</td>`).join("") + "</tr>";
+}
+
+type Cat = { points: number; maxPoints: number };
+
+function formatCategoryTable(assignments: Assignment[]): string {
+  const categories = new Map<string, Cat>();
+  for (const a of assignments) {
+    const c = categories.get(a.category);
+    categories.set(a.category, {
+      points: (c?.points ?? 0) + a.points,
+      maxPoints: (c?.maxPoints ?? 0) + a.maxPoints,
+    });
+  }
+
+  return `<table><tbody>
+    ${tr("Totals")}
+    ${tr("Category", "Points", "Max", "Perc", "Mark")}
+    ${Array.from(categories.entries()).map(([name, { points, maxPoints }]) =>
+      tr(
+        name,
+        points.toString(),
+        maxPoints.toString(),
+        (points / maxPoints).toFixed(2),
+        "F"
+      )
+    )}
+    ${tr("Totals @the bottom")}
+  </tbody></table>`;
+}
+
 app.get(`/${portalName}/class/:id`, (req, res) => {
   if (!authed(req)) return res.status(401).end("auth pls");
-  const id = Number(req.params.id);
+  const id: number = Number(req.params.id);
   const matches = classes.filter((c) => c.id == id);
-  console.log(matches);
   if (matches.length !== 1) return res.status(404).end("Class not found");
   const [c] = matches;
+  console.log(c);
 
   // we do a little bit of "XSS"
-  const tableContent = c.assignments.map(formatAssignmentAsRow).join("\n");
-  return res.send(`<div id="ctl00_MainContent_subGBS_tblEverything">
-  <table class="GradebookDetailsTable">
-  <tbody>
-  ${tableContent}
-  </tbody>
-  </table>
+  const tableContent = c.assignments
+    .filter((a) => !a.hidden)
+    .map(formatAssignmentAsRow)
+    .join("\n");
+  return res.send(`
+  <div id="ctl00_MainContent_subGBS_tblEverything">
+    <div class="assignments-view">
+      <table class="GradebookDetailsTable">
+        <tbody>
+          ${tableContent}
+        </tbody>
+      </table>
+      <table class="spacer"></table>
+      ${formatCategoryTable(c.assignments)}
+    </div>
   </div>`);
 });
 

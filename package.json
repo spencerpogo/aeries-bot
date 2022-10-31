@@ -10,8 +10,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon ./src/scripts/main.ts",
-    "build": "tsc",
-    "start": "node ./dist/scripts/main.js",
+    "start": "ts-node ./src/scripts/main.ts",
     "mockserver": "nodemon ./src/test/fakeAeriesServer.ts"
   },
   "devDependencies": {

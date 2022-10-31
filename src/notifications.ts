@@ -16,7 +16,12 @@ import {
 } from "./compareData.js";
 import { prisma } from "./db.js";
 import { logError } from "./logging.js";
-import { Assignment, ClassSummary, ClassWithAssignments } from "./types.js";
+import {
+  Assignment,
+  CategoryData,
+  ClassSummary,
+  ClassWithAssignments,
+} from "./types.js";
 
 type GradesData = {
   classes: ClassWithAssignments[];
@@ -182,6 +187,47 @@ export async function mergeNewClassSummary(
   return r;
 }
 
+function getHiddenAssignments(
+  assignments: Assignment[],
+  categories: CategoryData[]
+): Assignment[] {
+  console.log({ assignments, categories });
+  const r: Assignment[] = [];
+  for (const cat of categories) {
+    const catName = cat.cat;
+    const catAssignments = assignments.filter((a) => a.category == catName);
+    const categoryMaxPoints = cat.max;
+    const assignmentMaxPoints = catAssignments.reduce(
+      (acc, a) => acc + (a.maxPoints ?? 0),
+      0
+    );
+    if (categoryMaxPoints != assignmentMaxPoints) {
+      const categoryPoints = cat.points;
+      const assignmentPoints = catAssignments.reduce(
+        (acc, a) => acc + (a.points ?? 0),
+        0
+      );
+      const hiddenPoints = categoryPoints - assignmentPoints;
+      const hiddenMax = categoryMaxPoints - assignmentMaxPoints;
+      console.log({
+        categoryPoints,
+        categoryMaxPoints,
+        assignmentPoints,
+        assignmentMaxPoints,
+      });
+      r.push({
+        name: "Hidden Assignment",
+        category: catName,
+        points: hiddenPoints,
+        maxPoints: hiddenMax,
+        percent: (hiddenPoints / hiddenMax).toFixed(2),
+        gradingComplete: true,
+      });
+    }
+  }
+  return r;
+}
+
 async function getEmbedsForUser(user: User): Promise<APIEmbedField[]> {
   const client = getClient();
   await client.login(user.portalUsername, user.portalPassword);
@@ -225,9 +271,11 @@ async function getEmbedsForUser(user: User): Promise<APIEmbedField[]> {
     const oldAssignments = classesWithAssignments.get(
       newClass.name
     )!.assignments;
-    const newAssignments = (
-      await client.gradebookDetails(newClass.gradebookUrl)
-    ).assignments;
+    let { assignments: newAssignments, categories: newCategories } =
+      await client.gradebookDetails(newClass.gradebookUrl);
+    newAssignments = newAssignments.concat(
+      getHiddenAssignments(newAssignments, newCategories)
+    );
     // record the new assignmnets to be stored in the DB later
     classesWithAssignments.set(newClass.name, {
       ...newClass,
@@ -297,5 +345,5 @@ export async function sendNotifications() {
       continue;
     }
   }
-  setTimeout(sendNotifications, 60 * 1000);
+  setTimeout(sendNotifications, 5 * 1000);
 }

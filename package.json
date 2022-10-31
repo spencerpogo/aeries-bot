@@ -12,7 +12,7 @@
     "dev": "nodemon ./src/scripts/main.ts",
     "build": "tsc",
     "start": "node ./dist/scripts/main.js",
-    "mockserver": "nodemon ./dist/test/fakeAeriesServer.js"
+    "mockserver": "nodemon ./src/test/fakeAeriesServer.ts"
   },
   "devDependencies": {
     "@types/express": "^4.17.14",

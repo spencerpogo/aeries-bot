@@ -216,7 +216,7 @@ function getHiddenAssignments(
         assignmentMaxPoints,
       });
       r.push({
-        name: "Hidden Assignment",
+        name: `Hidden Assignment - ${catName}`,
         category: catName,
         points: hiddenPoints,
         maxPoints: hiddenMax,

@@ -27,7 +27,7 @@ async function handler(interaction: ChatInputCommandInteraction<CacheType>) {
       data: {
         notificationsEnabled,
         // when disabling notifications, delete the notifications cache
-        ...(notificationsEnabled ? {} : { notificationsCache: null }),
+        ...(notificationsEnabled ? {} : { notificationsCache: "" }),
       },
     });
   } catch (e) {

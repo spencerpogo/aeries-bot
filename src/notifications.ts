@@ -195,7 +195,9 @@ function getHiddenAssignments(
   const r: Assignment[] = [];
   for (const cat of categories) {
     const catName = cat.cat;
-    const catAssignments = assignments.filter((a) => a.category == catName);
+    const catAssignments = assignments.filter(
+      (a) => a.gradingComplete && a.category == catName
+    );
     const categoryMaxPoints = cat.max;
     const assignmentMaxPoints = catAssignments.reduce(
       (acc, a) => acc + (a.maxPoints ?? 0),

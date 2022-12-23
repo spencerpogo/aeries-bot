@@ -4,7 +4,7 @@ import {
   APIEmbedField,
   EmbedBuilder,
   escapeCodeBlock,
-  escapeMarkdown,
+  escapeMarkdown
 } from "discord.js";
 import { AeriesClient, getClient } from "./aeries.js";
 import { client } from "./client.js";
@@ -12,7 +12,7 @@ import {
   classesToMap,
   classesWithAssignmentsToMap,
   compareAssignments,
-  compareClasses,
+  compareClasses
 } from "./compareData.js";
 import { prisma } from "./db.js";
 import { logError } from "./logging.js";
@@ -20,7 +20,7 @@ import {
   Assignment,
   CategoryData,
   ClassSummary,
-  ClassWithAssignments,
+  ClassWithAssignments
 } from "./types.js";
 
 type GradesData = {
@@ -222,7 +222,7 @@ function getHiddenAssignments(
         category: catName,
         points: hiddenPoints,
         maxPoints: hiddenMax,
-        percent: (hiddenPoints / hiddenMax).toFixed(2),
+        percent: ((hiddenPoints / hiddenMax) * 100).toFixed(2),
         gradingComplete: true,
       });
     }

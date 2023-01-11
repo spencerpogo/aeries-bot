@@ -148,7 +148,7 @@ export class AeriesClient {
   static _getCategoryData($: CheerioAPI): CategoryData[] {
     const tables = $(".assignments-view").children("table");
     if (tables.length !== 3)
-      throw new Error("expected 3 tables in main layout");
+      return [];
     const rows = tables.eq(2).children("tbody").first().children("tr");
     if (rows.length < 4) throw new Error("expected at least one category");
     const columnNames = Array.from(rows.eq(1).children("td")).map((e) =>

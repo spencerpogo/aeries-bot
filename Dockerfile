@@ -26,7 +26,7 @@ RUN yarn install
 
 COPY --from=builder /app/dist/ ./dist
 
-FROM gcr.io/distroless/nodejs18-debian11
+FROM node:18-alpine3.16
 
 WORKDIR /usr/app
 COPY --from=setup /app ./
@@ -36,4 +36,4 @@ ENV NODE_ENV production
 ENV DATABASE_URL file:/data/database.sqlite
 
 ENV NODE_OPTIONS --enable-source-maps
-CMD [ "./dist/scripts/main.js" ]
+CMD [ "node", "./dist/scripts/main.js" ]

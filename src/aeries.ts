@@ -173,12 +173,12 @@ export class AeriesClient {
       });
     }
     if (
-      ["Category", "Perc ofGrade", "Points", "Max", "Perc", "Mark"].every(
+      ["Category", "Perc ofGrade", "Points", "Max"].every(
         (e, i) => e == columnNames[i]
       )
     ) {
       return Array.from(categoryRows).map((r) => {
-        const [cat, percOfGradeStr, points, max, _perc, _mark] = Array.from(
+        const [cat, percOfGradeStr, points, max] = Array.from(
           $(r).children("td")
         ).map((e) => trim($(e)));
         const m = /(\d+)(\.(\d+))?%/gm.exec(percOfGradeStr);

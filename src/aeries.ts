@@ -92,7 +92,7 @@ export class AeriesClient {
     }
   }
 
-  async getRawClassSummary(): Promise<any> {
+  async getRawClassSummary(): Promise<any[]> {
     console.log(`[Aeries] Fetch classSummary`);
     const res = await this.fetch(
       this.baseURL + "/Widgets/ClassSummary/GetClassSummary?IsProfile=True",
@@ -104,7 +104,13 @@ export class AeriesClient {
       }
     );
     this._checkResponse(res);
-    return await res.json();
+    const text = await res.text();
+    // For some reason, aeries returns a completely empty body instead of an empty
+    //  array when there are no classes.
+    if (text.length === 0) {
+      return [];
+    }
+    return Array.from(JSON.parse(text));
   }
 
   // parse out the gradebook link from the HTML inside the returned JSON data

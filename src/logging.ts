@@ -12,6 +12,7 @@ export async function logMessage(msg: string) {
 
 export async function logError(e: Error) {
   console.error(e);
+  if (process.env.NODE_ENV === "development") return;
   const errText: string = e.stack ?? e.toString();
   await webhookClient.send({
     content: CONFIG.LOG_MENTION,

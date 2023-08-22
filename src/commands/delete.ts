@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/index.js";
-import { ChatInputCommandInteraction, CacheType } from "discord.js";
+import { Prisma } from "@prisma/client";
+import { CacheType, ChatInputCommandInteraction } from "discord.js";
 import { prisma } from "../db.js";
 import { logMessage } from "../logging.js";
 import { CommandType } from "../types";
@@ -11,7 +11,10 @@ async function handler(interaction: ChatInputCommandInteraction<CacheType>) {
   try {
     await prisma.user.delete({ where: { discordId: interaction.user.id } });
   } catch (e) {
-    if (e instanceof PrismaClientKnownRequestError && e.code == "P2025") {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code == "P2025"
+    ) {
       await interaction.editReply(
         "The bot doesn't have any data on you, so there's nothing to delete!"
       );

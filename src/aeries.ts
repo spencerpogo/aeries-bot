@@ -179,7 +179,7 @@ export class AeriesClient {
       });
     }
     if (
-      ["Category", "Perc ofGrade", "Points", "Max"].every(
+      ["Category", "Perc\u{00a0}ofGrade", "Points", "Max"].every(
         (e, i) => e == columnNames[i]
       )
     ) {

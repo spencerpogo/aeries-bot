@@ -21,8 +21,9 @@
     "arg": "^5.0.2",
     "express": "^4.18.1",
     "prettier": "^2.7.1",
+    "prisma": "^5.1.1",
     "tsx": "^3.12.7",
-    "typescript": "^4.8.4"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",

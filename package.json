@@ -9,7 +9,7 @@
   "license": "AGPL-3.0-only",
   "private": true,
   "scripts": {
-    "dev": "nodemon ./src/scripts/main.ts",
+    "dev": "tsx watch ./src/scripts/main.ts",
     "build": "tsc",
     "start": "node --enable-source-maps ./dist/scripts/main.js",
     "mockserver": "nodemon ./src/test/fakeAeriesServer.ts"
@@ -20,19 +20,17 @@
     "@types/qs": "^6.9.7",
     "arg": "^5.0.2",
     "express": "^4.18.1",
-    "nodemon": "^2.0.20",
     "prettier": "^2.7.1",
-    "ts-node": "^10.9.1",
+    "tsx": "^3.12.7",
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@prisma/client": "^4.4.0",
+    "@prisma/client": "^5.0.0",
     "cheerio": "^1.0.0-rc.12",
     "discord-api-types": "^0.37.11",
     "discord.js": "^14.5.0",
     "fetch-cookie": "^2.1.0",
     "node-fetch": "^3.2.10",
-    "prisma": "^4.4.0",
     "qs": "^6.11.0",
     "zod": "^3.19.1"
   }

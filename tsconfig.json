@@ -24,8 +24,5 @@
     "baseUrl": "."
   },
   "exclude": ["node_modules"],
-  "include": ["./src/**/*.ts"],
-  "ts-node": {
-    "esm": true
-  }
+  "include": ["./src/**/*.ts"]
 }

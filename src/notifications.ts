@@ -4,7 +4,7 @@ import {
   APIEmbedField,
   EmbedBuilder,
   escapeCodeBlock,
-  escapeMarkdown
+  escapeMarkdown,
 } from "discord.js";
 import { AeriesClient, getClient } from "./aeries.js";
 import { client } from "./client.js";
@@ -12,7 +12,7 @@ import {
   classesToMap,
   classesWithAssignmentsToMap,
   compareAssignments,
-  compareClasses
+  compareClasses,
 } from "./compareData.js";
 import { prisma } from "./db.js";
 import { logError } from "./logging.js";
@@ -20,7 +20,7 @@ import {
   Assignment,
   CategoryData,
   ClassSummary,
-  ClassWithAssignments
+  ClassWithAssignments,
 } from "./types.js";
 
 type GradesData = {
@@ -143,6 +143,19 @@ function getCachedData(user: User): GradesData | null {
   }
 }
 
+async function fetchGradebook(
+  client: AeriesClient,
+  gradebookUrl: string
+): Promise<{ assignments: Assignment[]; categories: CategoryData[] }> {
+  const { assignments, categories } = await client.gradebookDetails(
+    gradebookUrl
+  );
+  return {
+    assignments: assignments.filter((a) => a.gradingComplete),
+    categories,
+  };
+}
+
 async function processNewUser(
   user: User,
   classes: ClassSummary[],
@@ -155,7 +168,7 @@ async function processNewUser(
     newClasses.push({
       ...c,
       assignments: Array.from(
-        (await client.gradebookDetails(c.gradebookUrl)).assignments.values()
+        (await fetchGradebook(client, c.gradebookUrl)).assignments.values()
       ),
     });
   }
@@ -257,7 +270,7 @@ async function getEmbedsForUser(user: User): Promise<APIEmbedField[]> {
       //  fetch them.
       assignments:
         oldMap.get(k)?.assignments ??
-        (await client.gradebookDetails(v.gradebookUrl)).assignments,
+        (await fetchGradebook(client, v.gradebookUrl)).assignments,
     });
   }
 
@@ -274,7 +287,7 @@ async function getEmbedsForUser(user: User): Promise<APIEmbedField[]> {
       newClass.name
     )!.assignments;
     let { assignments: newAssignments, categories: newCategories } =
-      await client.gradebookDetails(newClass.gradebookUrl);
+      await fetchGradebook(client, newClass.gradebookUrl);
     newAssignments = newAssignments.concat(
       getHiddenAssignments(newAssignments, newCategories)
     );
